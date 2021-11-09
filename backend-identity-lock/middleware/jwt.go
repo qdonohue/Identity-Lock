@@ -10,8 +10,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/auth0/go-jwt-middleware"
-	"github.com/auth0/go-jwt-middleware/validate/jwt-go"
+	jwtmiddleware "github.com/auth0/go-jwt-middleware"
+	jwtgo "github.com/auth0/go-jwt-middleware/validate/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
