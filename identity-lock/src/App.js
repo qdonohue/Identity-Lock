@@ -6,7 +6,7 @@ import {
   Link
 } from 'react-router-dom';
 
-import { AuthProvider } from './Network/useAuth';
+import { NetworkProvider } from './Network/useNetwork';
 import { Home } from './Home';
 import './App.css';
 
@@ -14,7 +14,7 @@ import './App.css';
 function App() {
   return (
     <Router>
-      <AuthProvider>
+      <NetworkProvider>
         <div className="App">
           <title>Identity Lock</title>
           <Switch>
@@ -35,7 +35,7 @@ function App() {
             </Route>
           </Switch>
         </div>
-      </AuthProvider>
+      </NetworkProvider>
     </Router>
   );
 }
