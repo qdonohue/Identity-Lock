@@ -12,31 +12,37 @@ const NetworkContext = createContext()
 
 // Export the provider as we need to wrap the entire app with it
 export const NetworkProvider = ({ children }) => {
-    const { getAccessTokenSilently } = useAuth0();
+    const { getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     async function apiPost(endpoint, payload) {
-        {
-            try {
-                setLoading(true)
-                const token = await getAccessTokenSilently({
-                    audience: 'identity-lock',
-                });
-                const response = await axios.post(process.env.REACT_APP_BACKEND_URL + endpoint, payload, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                let resp = await response.data()
-                setLoading(false)
-                return resp
-                
-            } catch (e) {
-                console.error(e);
-                setError(e)
-                setLoading(false)
-            }
+        console.log("Making network request")
+        let token;
+        setLoading(true)
+        try {
+            token = await getAccessTokenSilently({
+                audience: 'identity-lock',
+            });
+        } catch (e) {
+            token = await getAccessTokenWithPopup({
+                audience: 'identity-lock',
+            })
+        }
+
+        try {
+            const response = await axios.post(process.env.REACT_APP_BACKEND_URL + endpoint, payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            let resp = await response.data()
+            setLoading(false)
+            return resp
+
+        } catch (e) {
+            setLoading(false)
+            console.error(e);
         }
     }
 
