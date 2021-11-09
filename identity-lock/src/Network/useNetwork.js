@@ -1,8 +1,6 @@
 import React, {
     createContext,
-    ReactNode,
     useContext,
-    useEffect,
     useMemo,
     useState,
 } from "react"
@@ -30,7 +28,7 @@ export const NetworkProvider = ({ children }) => {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                resp = await response.data()
+                let resp = await response.data()
                 setLoading(false)
                 return resp
                 
@@ -55,9 +53,9 @@ export const NetworkProvider = ({ children }) => {
     // We only want to render the underlying app after we
     // assert for the presence of a current user.
     return (
-        <AuthContext.Provider value={memoedValue}>
+        <NetworkContext.Provider value={memoedValue}>
             {children}
-        </AuthContext.Provider>
+        </NetworkContext.Provider>
     );
 }
 

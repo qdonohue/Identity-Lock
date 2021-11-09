@@ -1,11 +1,17 @@
-import Auth0Wrapper from "./Utility/Auth0LoadingWrapper"
-import Login from "./Utility/Login"
-import Logout from "./Utility/Logout"
+
+import { useAuth0 } from "@auth0/auth0-react"
+
+import { LoginButton, LogoutButton } from "./Utility/signinhelper"
 
 export const Home = () => {
+    const {isAuthenticated, user} = useAuth0();
+    
     return (
-        <Auth0Wrapper>
-
-        </Auth0Wrapper>
+        <>
+            <p> Super basic test going on here</p>
+            <LoginButton />
+            {isAuthenticated && <div>Hello {user.name}</div>}
+            <LogoutButton />
+        </>
     )
 }
