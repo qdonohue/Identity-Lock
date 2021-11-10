@@ -3,8 +3,9 @@ import { Fragment } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/outline'
 
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
+import { formatName } from './Utility/name'
 
 import logo from './FullLogo.jpg'
 
@@ -21,9 +22,14 @@ function classNames(...classes) {
 
 export default function NavBar() {
     const { isAuthenticated, user, loginWithPopup } = useAuth0();
+    const location = useLocation();
+
+    console.log(location.pathname)
+
+    const formattedName = formatName(user.name)
+
     return (
         <Disclosure as="nav" className="bg-gray-800">
-        {isAuthenticated ? }
             {({ open }) => (
                 <>
                     <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
@@ -44,7 +50,7 @@ export default function NavBar() {
                                                     key={item.name}
                                                     href={item.href}
                                                     className={classNames(
-                                                        item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                                                        item.path == location.pathname ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                                                         'px-3 py-2 rounded-md text-sm font-medium'
                                                     )}
                                                     aria-current={item.current ? 'page' : undefined}
@@ -66,15 +72,12 @@ export default function NavBar() {
                                 </button> */}
 
                                 {/* Profile dropdown */}
-                                <Menu as="div" className="ml-3 relative">
+                                {<Menu as="div" className="ml-3 relative">
                                     <div>
-                                        <Menu.Button className="bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                                        <Menu.Button className={'text-gray-300 hover:bg-gray-700 hover:text-white' +
+                                                        'px-3 py-2 rounded-md text-sm font-medium'}>
                                             <span className="sr-only">Open user menu</span>
-                                            <img
-                                                className="h-8 w-8 rounded-full"
-                                                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                                                alt=""
-                                            />
+                                            <div className="">{formattedName}</div>
                                         </Menu.Button>
                                     </div>
                                     <Transition
@@ -119,7 +122,7 @@ export default function NavBar() {
                                             </Menu.Item>
                                         </Menu.Items>
                                     </Transition>
-                                </Menu>
+                                </Menu>}
                             </div>
                         </div>
                     </div>
