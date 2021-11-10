@@ -30,6 +30,8 @@ export const NetworkProvider = ({ children }) => {
             })
         }
 
+        console.log(token)
+
         try {
             const response = await axios.post(process.env.REACT_APP_BACKEND_URL + endpoint, payload, {
                 headers: {
@@ -46,12 +48,62 @@ export const NetworkProvider = ({ children }) => {
         }
     }
 
+    async function apiGet(endpoint) {
+        console.log("Making get network request")
+        let token;
+        setLoading(true)
+        try {
+            token = await getAccessTokenSilently({
+                audience: 'identity-lock',
+            });
+        } catch (e) {
+            token = await getAccessTokenWithPopup({
+                audience: 'identity-lock',
+            })
+        }
+
+        console.log(token)
+
+        try {
+            const response = await axios.get(process.env.REACT_APP_BACKEND_URL + endpoint, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            let resp = await response.data()
+            setLoading(false)
+            return resp
+
+        } catch (e) {
+            setLoading(false)
+            console.error(e);
+        }
+    }
+
+    async function getToken() {
+        let token;
+        setLoading(true)
+        try {
+            token = await getAccessTokenSilently({
+                audience: 'identity-lock',
+            });
+        } catch (e) {
+            token = await getAccessTokenWithPopup({
+                audience: 'identity-lock',
+            })
+        }
+        setLoading(false)
+        return token;
+    }
+
     // Re-render on change in loading, error, or access token state
     const memoedValue = useMemo(
         () => ({
             loading,
             error,
             apiPost,
+            apiGet,
+            getToken,
         }),
         [loading, error]
     );
