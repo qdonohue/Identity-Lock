@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	jwtgo "github.com/auth0/go-jwt-middleware/validate/jwt-go"
@@ -23,14 +22,16 @@ var _ jwtgo.CustomClaims = &CustomClaims{}
 
 // CustomClaims holds our custom claims for the *jwt.Token.
 type CustomClaims struct {
-	Scope string `json:"scope"`
+	//	Scope string `json:"scope"`
 	jwt.StandardClaims
 }
 
 // Validate our *CustomClaims.
 func (c CustomClaims) Validate(_ context.Context) error {
 	expectedAudience := os.Getenv("AUTH0_AUDIENCE")
+	log.Println(c.Audience)
 	if c.Audience != expectedAudience {
+		log.Println(c.Audience)
 		return fmt.Errorf("token claims validation failed: unexpected audience %q", c.Audience)
 	}
 
@@ -43,16 +44,16 @@ func (c CustomClaims) Validate(_ context.Context) error {
 }
 
 // HasScope checks whether our claims have a specific scope.
-func (c CustomClaims) HasScope(expectedScope string) bool {
-	result := strings.Split(c.Scope, " ")
-	for i := range result {
-		if result[i] == expectedScope {
-			return true
-		}
-	}
+// func (c CustomClaims) HasScope(expectedScope string) bool {
+// 	result := strings.Split(c.Scope, " ")
+// 	for i := range result {
+// 		if result[i] == expectedScope {
+// 			return true
+// 		}
+// 	}
 
-	return false
-}
+// 	return false
+// }
 
 // EnsureValidToken is a gin.HandlerFunc middleware that will check the validity of our JWT.
 func EnsureValidToken() gin.HandlerFunc {

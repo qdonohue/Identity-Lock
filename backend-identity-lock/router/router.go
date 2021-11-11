@@ -3,7 +3,6 @@ package router
 import (
 	"net/http"
 
-	"github.com/auth0/go-jwt-middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
@@ -14,13 +13,31 @@ import (
 func New() *gin.Engine {
 	router := gin.Default()
 
-	router.Use(cors.New(
-		cors.Config{
-			AllowOrigins:     []string{"http://localhost:3000"},
-			AllowCredentials: true,
-			AllowHeaders:     []string{"Authorization"},
-		},
-	))
+	// router.Use(cors.New(
+	// 	cors.Config{
+	// 		AllowOrigins:     []string{"http://localhost:3000"},
+	// 		AllowCredentials: true,
+	// 		AllowHeaders:     []string{"Authorization"},
+	// 	},
+	// ))
+
+	//router.Use(cors.Default())
+
+	router.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"POST", "OPTIONS", "GET", "PUT"},
+		AllowHeaders:     []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
+
+	// This route is always accessible.
+	router.Any("/ping", func(ctx *gin.Context) {
+		response := map[string]string{
+			"message": "Pong",
+		}
+		ctx.JSON(http.StatusOK, response)
+	})
 
 	// This route is always accessible.
 	router.Any("/api/public", func(ctx *gin.Context) {
@@ -35,27 +52,6 @@ func New() *gin.Engine {
 		"/api/private",
 		middleware.EnsureValidToken(),
 		func(ctx *gin.Context) {
-			response := map[string]string{
-				"message": "Hello from a private endpoint! You need to be authenticated to see this.",
-			}
-			ctx.JSON(http.StatusOK, response)
-		},
-	)
-
-	// This route is only accessible if the user has a
-	// valid access_token with the read:messages scope.
-	router.GET(
-		"/api/private-scoped",
-		middleware.EnsureValidToken(),
-		func(ctx *gin.Context) {
-			claims := ctx.Request.Context().Value(jwtmiddleware.ContextKey{}).(*middleware.CustomClaims)
-
-			if !claims.HasScope("read:messages") {
-				response := map[string]string{"message": "Insufficient scope."}
-				ctx.JSON(http.StatusForbidden, response)
-				return
-			}
-
 			response := map[string]string{
 				"message": "Hello from a private endpoint! You need to be authenticated to see this.",
 			}
