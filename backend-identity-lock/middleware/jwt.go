@@ -29,13 +29,14 @@ type CustomClaims struct {
 // Validate our *CustomClaims.
 func (c CustomClaims) Validate(_ context.Context) error {
 	expectedAudience := os.Getenv("AUTH0_AUDIENCE")
-	log.Println(c.Audience)
+	log.Println(c.Audience + "|" + expectedAudience)
 	if c.Audience != expectedAudience {
 		log.Println(c.Audience)
 		return fmt.Errorf("token claims validation failed: unexpected audience %q", c.Audience)
 	}
 
 	expectedIssuer := "https://" + os.Getenv("AUTH0_DOMAIN") + "/"
+	log.Println(c.Issuer + "|" + expectedIssuer)
 	if c.Issuer != expectedIssuer {
 		return fmt.Errorf("token claims validation failed: unexpected issuer %q", c.Issuer)
 	}
@@ -75,6 +76,7 @@ func EnsureValidToken() gin.HandlerFunc {
 		signatureAlgorithm,
 		jwtgo.WithCustomClaims(customClaims),
 	)
+
 	if err != nil {
 		log.Fatalf("Failed to set up the jwt validator")
 	}
