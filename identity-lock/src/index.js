@@ -11,6 +11,7 @@ ReactDOM.render(
     <Auth0Provider
       domain="dev-xpa94aad.us.auth0.com"
       clientId="KP0P3Gjy9w50OcgTKAgih7mxa4pYGYPK"
+      audience='identity-lock'
       redirectUri={window.location.origin}
     >
       <App />
