@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/rsa"
+
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,7 +32,9 @@ func middleware(next http.Handler) http.Handler {
 			fmt.Println("Malformed token")
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte("Malformed Token"))
+			return
 		} else {
+
 			jwtToken := authHeader[1]
 			token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
 				// Don't forget to validate the alg is what you expect:
@@ -48,23 +51,15 @@ func middleware(next http.Handler) http.Handler {
 			})
 
 			if err != nil {
-				log.Fatal(err)
+				fmt.Println(err)
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte("Unauthorized"))
+				return
 			}
 
-			if token.Valid {
-				claims := token.Claims.(jwt.MapClaims)
+			claims := token.Claims.(jwt.MapClaims)
 
-				if !claims.VerifyIssuer("https://dev-xpa94aad.us.auth0.com/", true) {
-					w.WriteHeader(http.StatusUnauthorized)
-					w.Write([]byte("Unauthorized"))
-				}
-
-				if !claims.VerifyAudience("identity-lock https://dev-xpa94aad.us.auth0.com/userinfo", true) {
-					w.WriteHeader(http.StatusUnauthorized)
-					w.Write([]byte("Unauthorized"))
-
-				}
-
+			if validClaims(&claims) {
 				ctx := context.WithValue(r.Context(), "props", claims)
 				// Access context values in handlers like this
 				// props, _ := r.Context().Value("props").(jwt.MapClaims)
@@ -73,6 +68,7 @@ func middleware(next http.Handler) http.Handler {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusUnauthorized)
 				w.Write([]byte("Unauthorized"))
+				return
 			}
 		}
 
@@ -80,8 +76,16 @@ func middleware(next http.Handler) http.Handler {
 	})
 }
 
-func validateClaims(claims *jwt.MapClaims) bool {
+func validClaims(claims *jwt.MapClaims) bool {
 
+	err := claims.Valid()
+	if err != nil {
+		fmt.Print(err)
+		fmt.Print("INVALID CLAIMS")
+		return false
+	}
+
+	return claims.VerifyIssuer("https://dev-xpa94aad.us.auth0.com/", true) && claims.VerifyAudience("identity-lock", true)
 }
 
 type (
