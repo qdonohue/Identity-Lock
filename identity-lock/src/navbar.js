@@ -5,7 +5,9 @@ import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/outline'
 
 import { Link, useLocation, useHistory } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
+
 import { formatName } from './Utility/name'
+import { classNames } from './Utility/tailwindHelper'
 
 import logo from './FullLogo.jpg'
 
@@ -20,10 +22,6 @@ const signedOutNavigation = [
     { name: 'Home', path: '/home', id: 5 },
     { name: 'Sign up', path: '/signup', id: 6 },
 ]
-
-function classNames(...classes) {
-    return classes.filter(Boolean).join(' ')
-}
 
 export default function NavBar() {
     const { isAuthenticated, user, loginWithPopup, logout } = useAuth0();

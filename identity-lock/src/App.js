@@ -10,7 +10,7 @@ import { NetworkProvider } from './Network/useNetwork';
 import { AuthWrapper } from './Utility/AuthWrapper'
 import { Home } from './Home';
 import NavBar from './navbar';
-import { Signup } from './signup';
+import { Signup } from './Signup/Signup';
 import { Documents } from './Documents';
 import { Contacts } from './Contacts';
 import { Alerts } from './Alerts';
@@ -33,7 +33,7 @@ function App() {
               </Route>
               {/* Redirect users here for sign up process */}
               <Route path="/signup">
-                <Signup />
+                {/* <Signup /> */}
               </Route>
               {/* Core management page - view documents to send, which are accessible, notifications */}
               <Route path="/home">
