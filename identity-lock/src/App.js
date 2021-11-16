@@ -7,9 +7,15 @@ import {
 } from 'react-router-dom';
 
 import { NetworkProvider } from './Network/useNetwork';
-import {AuthWrapper } from './Utility/AuthWrapper'
+import { AuthWrapper } from './Utility/AuthWrapper'
 import { Home } from './Home';
+import NavBar from './navbar';
+import { Signup } from './signup';
+import { Documents } from './Documents';
+import { Contacts } from './Contacts';
+import { Alerts } from './Alerts';
 import './App.css';
+import { DocumentView } from './DocumentView';
 
 
 function App() {
@@ -19,21 +25,34 @@ function App() {
         <NetworkProvider>
           <div className="App">
             <title>Identity Lock</title>
+            <NavBar />
             <Switch>
               {/* Base route - info page, login page */}
-              <Route path="/">
+              <Route exact path="/">
                 <Home />
               </Route>
               {/* Redirect users here for sign up process */}
               <Route path="/signup">
+                <Signup />
               </Route>
               {/* Core management page - view documents to send, which are accessible, notifications */}
               <Route path="/home">
+                <Home />
               </Route>
-              {/* Management - add contacts, documents  */}
-              <Route path="/home">
+              {/* View Documents you uploaded / manage */}
+              <Route path="/documents">
+                <Documents />
               </Route>
-              <Route path="/viewdocument">
+              {/* See your contacts / who you can send to. */}
+              <Route path="/contacts">
+                <Contacts />
+              </Route>
+              {/* View alerts you've recieved for document violations*/}
+              <Route path="/alerts">
+                <Alerts />
+              </Route>
+              <Route path="/viewdocument/:documentID">
+                <DocumentView />
               </Route>
             </Switch>
           </div>
