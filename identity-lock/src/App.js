@@ -33,7 +33,7 @@ function App() {
               </Route>
               {/* Redirect users here for sign up process */}
               <Route path="/signup">
-                {/* <Signup /> */}
+                <Signup />
               </Route>
               {/* Core management page - view documents to send, which are accessible, notifications */}
               <Route path="/home">

@@ -3,13 +3,16 @@ import { CheckIcon } from '@heroicons/react/solid'
 
 import { classNames } from '../Utility/tailwindHelper'
 
-const steps = [
-  { id: '01', name: 'Connect your account', description: '', href: '#', status: 'complete' },
-  { id: '02', name: 'Facial Recognition', description: 'Register your face with the system', href: '#', status: 'current' },
-  { id: '03', name: 'Preview', description: 'Penatibus eu quis ante.', href: '#', status: 'upcoming' },
-]
+import { SIGNUP_STEP, STAGE_STATUS, stepToStatus } from './utils'
 
-export const ProgressBar = (currentStep) => {
+export const ProgressBar = ({step, setStep}) => {
+
+  const steps = [
+    { id: SIGNUP_STEP.LOGIN, name: 'Connect your account', description: '', status: stepToStatus(step, SIGNUP_STEP.LOGIN)},
+    { id: SIGNUP_STEP.PHOTO, name: 'Facial Recognition', description: 'Register your face with the system', status: stepToStatus(step, SIGNUP_STEP.PHOTO)},
+    { id: SIGNUP_STEP.CONFIRM, name: 'Preview', description: 'Complete your profile', status: stepToStatus(step, SIGNUP_STEP.CONFIRM) },
+  ]
+
   return (
     <div className="lg:border-t lg:border-b lg:border-gray-200">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Progress">
@@ -26,8 +29,8 @@ export const ProgressBar = (currentStep) => {
                   'border border-gray-200 overflow-hidden lg:border-0'
                 )}
               >
-                {step.status === 'complete' ? (
-                  <div className="group">
+                {step.status === STAGE_STATUS.COMPLETE ? (
+                  <div className="group" onClick={() => setStep(step.id)}>
                     <span
                       className="absolute top-0 left-0 w-1 h-full bg-transparent group-hover:bg-gray-200 lg:w-full lg:h-1 lg:bottom-0 lg:top-auto"
                       aria-hidden="true"
@@ -49,7 +52,7 @@ export const ProgressBar = (currentStep) => {
                       </span>
                     </span>
                   </div>
-                ) : step.status === 'current' ? (
+                ) : step.status === STAGE_STATUS.CURRENT ? (
                   <div aria-current="step">
                     <span
                       className="absolute top-0 left-0 w-1 h-full bg-indigo-600 lg:w-full lg:h-1 lg:bottom-0 lg:top-auto"
@@ -96,7 +99,7 @@ export const ProgressBar = (currentStep) => {
                         <span className="text-sm font-medium text-gray-500">{step.description}</span>
                       </span>
                     </span>
-                  </div>b
+                  </div>
                 )}
 
                 {stepIdx !== 0 ? (
