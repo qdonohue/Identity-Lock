@@ -12,15 +12,20 @@ export const Signup = () => {
 
     console.log(`Current step is: ${step}`)
 
+    const handleImage = (img) => {
+        setImg(img)
+        setStep(SIGNUP_STEP.CONFIRM)
+    }
+
     return (
         <>
             <div class="flex flex-col justify-center items-center w-1/2 mx-auto mt-36 h-1/2">
                     {(step == SIGNUP_STEP.LOGIN) &&
                         <Login setNextStep={setStep} />}
                     {(step == SIGNUP_STEP.PHOTO &&
-                    <ProfilePhoto setImg={setImg} setStep={setStep}/>)}
-                    {/* {(step == SIGNUP_STEP.CONFIRM) &&
-                    <FullProfile img={img} setStep={setStep} />} */}
+                    <ProfilePhoto handleImage={handleImage}/>)}
+                    {(step == SIGNUP_STEP.CONFIRM) &&
+                    <FullProfile img={img} setStep={setStep} />}
             </div>
 
             <div class="fixed bottom-0 inset-x-0 white-800">

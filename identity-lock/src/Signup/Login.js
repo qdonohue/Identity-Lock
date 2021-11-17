@@ -32,7 +32,7 @@ export const Login = ({ setNextStep }) => {
     }
 
     return (
-        <div class="flex flex-col flex-grow justify-center bg-blue-800 items-center text-white rounded-lg border shadow-lg p-10 my-10 w-100">
+        <div className="flex flex-col flex-grow justify-center bg-blue-800 items-center text-white rounded-lg border shadow-lg p-10 my-10 w-100">
 
             <img src={user.picture} alt="Profile Picture" class="w-36 h-36 rounded-full object-cover" />
             <div className="text-center font-bold text-2xl ">

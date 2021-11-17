@@ -9,16 +9,15 @@ const videoConstraints = {
     facingMode: "user"
 };
 
-export const ProfilePhoto = ({setImg, setStep}) => {
+export const ProfilePhoto = ({handleImage}) => {
     const webcamRef = useRef(null);
 
     const capture = useCallback(
         () => {
             const imageSrc = webcamRef.current.getScreenshot();
-            setImg(imageSrc)
-            setStep(SIGNUP_STEP.CONFIRM)
+            handleImage(imageSrc)
         },
-        [webcamRef, setStep]
+        [webcamRef]
     );
 
     return (
