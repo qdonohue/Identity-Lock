@@ -16,6 +16,7 @@ import { Contacts } from './Contacts';
 import { Alerts } from './Alerts';
 import './App.css';
 import { DocumentView } from './DocumentView';
+import { ProfilePage } from './ProfilePage';
 
 
 function App() {
@@ -50,6 +51,9 @@ function App() {
               {/* View alerts you've recieved for document violations*/}
               <Route path="/alerts">
                 <Alerts />
+              </Route>
+              <Route path="/profile">
+                <ProfilePage />
               </Route>
               <Route path="/viewdocument/:documentID">
                 <DocumentView />
