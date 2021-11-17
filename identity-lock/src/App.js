@@ -10,12 +10,13 @@ import { NetworkProvider } from './Network/useNetwork';
 import { AuthWrapper } from './Utility/AuthWrapper'
 import { Home } from './Home';
 import NavBar from './navbar';
-import { Signup } from './signup';
+import { Signup } from './Signup/Signup';
 import { Documents } from './Documents';
 import { Contacts } from './Contacts';
 import { Alerts } from './Alerts';
 import './App.css';
 import { DocumentView } from './DocumentView';
+import { ProfilePage } from './ProfilePage';
 
 
 function App() {
@@ -23,7 +24,7 @@ function App() {
     <Router>
       <AuthWrapper>
         <NetworkProvider>
-          <div className="App">
+          <div class="h-screen">
             <title>Identity Lock</title>
             <NavBar />
             <Switch>
@@ -50,6 +51,9 @@ function App() {
               {/* View alerts you've recieved for document violations*/}
               <Route path="/alerts">
                 <Alerts />
+              </Route>
+              <Route path="/profile">
+                <ProfilePage />
               </Route>
               <Route path="/viewdocument/:documentID">
                 <DocumentView />

@@ -5,7 +5,9 @@ import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/outline'
 
 import { Link, useLocation, useHistory } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
+
 import { formatName } from './Utility/name'
+import { classNames } from './Utility/tailwindHelper'
 
 import logo from './FullLogo.jpg'
 
@@ -20,10 +22,6 @@ const signedOutNavigation = [
     { name: 'Home', path: '/home', id: 5 },
     { name: 'Sign up', path: '/signup', id: 6 },
 ]
-
-function classNames(...classes) {
-    return classes.filter(Boolean).join(' ')
-}
 
 export default function NavBar() {
     const { isAuthenticated, user, loginWithPopup, logout } = useAuth0();
@@ -96,7 +94,7 @@ export default function NavBar() {
                                         <Menu.Item>
                                             {({ active }) => (
                                                 <Link to={'/profile'}>
-                                                    <div className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
+                                                    <div onClick={() => {history.push('/profile') }} className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
                                                         Profile
                                                     </div>
                                                 </Link>
