@@ -23,7 +23,7 @@ function App() {
     <Router>
       <AuthWrapper>
         <NetworkProvider>
-          <div className="App">
+          <div class="h-screen">
             <title>Identity Lock</title>
             <NavBar />
             <Switch>
