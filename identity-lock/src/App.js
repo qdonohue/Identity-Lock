@@ -11,11 +11,11 @@ import { AuthWrapper } from './Utility/AuthWrapper'
 import { Home } from './Home';
 import NavBar from './navbar';
 import { Signup } from './Signup/Signup';
-import { Documents } from './Documents';
+import { Documents } from './Document/Documents';
 import { Contacts } from './Contacts';
 import { Alerts } from './Alerts';
 import './App.css';
-import { DocumentView } from './DocumentView';
+import { DocumentView } from './Document/DocumentView';
 import { ProfilePage } from './ProfilePage';
 
 
