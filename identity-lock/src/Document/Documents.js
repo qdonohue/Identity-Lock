@@ -3,6 +3,7 @@ import { useState } from "react"
 import { DocumentTable } from "./DocumentTable"
 import { DocumentTableHeader } from "./DocumentTableHeader"
 import { DocumentManagementModal } from "./DocumentManagementModal"
+import { DocumentUploadModal } from "./DocumentUploadModal"
 
 const people = [
     {
@@ -99,18 +100,18 @@ const documents = [
 ]
 
 export const Documents = () => {
-    const [managementModal, setManagementModal] = useState(false)
-    const [selectedDocument, setSelectedDocument] = useState(null)
+    const [documentManagementModal, setDocumentManagementModal] = useState({active: false, id: null})
+    const [documentUploadModal, setDocumentUploadModal] = useState(null)
 
     const openManagementModal = (id) => {
-        setSelectedDocument(id)
-        setManagementModal(true)
+        setDocumentManagementModal({active: true, id})
     }
 
     return (
         <div className="flex flex-col align-center items-center justify-start max-h-screen">
-            {managementModal && <DocumentManagementModal document={documents[selectedDocument]} closeModal={() => setManagementModal(false)}/>}
-            <DocumentTableHeader count={documents.length} openNewDocumentModal={setManagementModal}/>
+            {documentUploadModal && <DocumentUploadModal closeModal={() => setDocumentUploadModal(null)}/>}
+            {documentManagementModal.active && <DocumentManagementModal document={documents[documentManagementModal.id]} closeModal={() => setDocumentManagementModal({active: false, id: null})}/>}
+            <DocumentTableHeader count={documents.length} openNewDocumentModal={setDocumentUploadModal}/>
             <DocumentTable documents={documents} documentManagementModal={openManagementModal}/>
         </div>
     )
