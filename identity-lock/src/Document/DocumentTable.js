@@ -7,7 +7,7 @@ const distributedBadge = (sent) => {
     </span>)
 }
 
-export const DocumentTable = ({documents}) => {
+export const DocumentTable = ({documents, documentManagementModal}) => {
 
     return (
         <div className="flex-1 flex flex-col px-5 mx-10 w-full">
@@ -39,7 +39,7 @@ export const DocumentTable = ({documents}) => {
                             </thead>
                             <tbody className="divide-y">
                                 {documents.map((document, documentIdx) => (
-                                    <tr key={documentIdx} className="bg-white hover:bg-gray-100">
+                                    <tr key={documentIdx} className="bg-white hover:bg-gray-100 cursor-pointer" onClick={() => {console.log(documentIdx); documentManagementModal(documentIdx)}}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{document.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{distributedBadge(document.distributed)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{document.uploaded}</td>
