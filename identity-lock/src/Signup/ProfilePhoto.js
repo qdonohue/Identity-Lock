@@ -21,12 +21,12 @@ export const ProfilePhoto = ({handleImage}) => {
     );
 
     return (
-        <div class="flex flex-col flex-grow justify-center bg-blue-800 items-center text-white rounded-lg border shadow-lg p-10 my-10 min-w-full">
-            <div class="text-white font-bold text-2xl text-center">
+        <div className="flex flex-col flex-grow justify-center bg-blue-800 items-center text-white rounded-lg border shadow-lg p-10 my-10 min-w-full">
+            <div className="text-white font-bold text-2xl text-center">
                 Lets get a photo to recognize you.
             </div>
             <Webcam
-                class="p-5"
+                className="p-5"
                 audio={false}
                 mirrored={true}
                 height={720}

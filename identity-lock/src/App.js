@@ -24,7 +24,7 @@ function App() {
     <Router>
       <AuthWrapper>
         <NetworkProvider>
-          <div class="h-screen">
+          <div className="h-screen flex-col justify-center align-center">
             <title>Identity Lock</title>
             <NavBar />
             <Switch>

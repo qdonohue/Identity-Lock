@@ -19,7 +19,7 @@ export const Signup = () => {
 
     return (
         <>
-            <div class="flex flex-col justify-center items-center w-1/2 mx-auto mt-36 h-1/2">
+            <div className="flex flex-col justify-center items-center w-1/2 mx-auto mt-36 h-1/2">
                     {(step == SIGNUP_STEP.LOGIN) &&
                         <Login setNextStep={setStep} />}
                     {(step == SIGNUP_STEP.PHOTO &&
@@ -28,7 +28,7 @@ export const Signup = () => {
                     <FullProfile img={img} setStep={setStep} />}
             </div>
 
-            <div class="fixed bottom-0 inset-x-0 white-800">
+            <div className="fixed bottom-0 inset-x-0 white-800">
                 <ProgressBar step={step} setStep={setStep} />
             </div>
         </>
