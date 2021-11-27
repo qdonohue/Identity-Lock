@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Identity-Lock/go-backend/api"
+	"Identity-Lock/go-backend/app"
 	"log"
 
 	"github.com/joho/godotenv"
@@ -15,7 +15,7 @@ func main() {
 		log.Fatalf("Error loading .env file")
 	}
 
-	app := api.NewApp()
+	app := app.NewApp()
 
 	log.Print("Starting server on port 8080")
 
