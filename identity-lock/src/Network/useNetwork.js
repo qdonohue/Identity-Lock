@@ -18,17 +18,8 @@ export const NetworkProvider = ({ children }) => {
 
     async function apiPost(endpoint, payload) {
         console.log("Making network request")
-        let token;
         setLoading(true)
-        try {
-            token = await getAccessTokenSilently({
-                audience: 'identity-lock',
-            });
-        } catch (e) {
-            token = await getAccessTokenWithPopup({
-                audience: 'identity-lock',
-            })
-        }
+        const token = await getToken()
 
         console.log(token)
 
@@ -38,10 +29,30 @@ export const NetworkProvider = ({ children }) => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            let resp = await response.data()
             setLoading(false)
-            return resp
+            return response.data
 
+        } catch (e) {
+            setLoading(false)
+            console.error(e);
+        }
+    }
+
+    async function imagePost(endpoint, payload) {
+        setLoading(true)
+
+        const token = await getToken()
+
+        try {
+            const response = await axios.post(process.env.REACT_APP_BACKEND_URL + endpoint,
+                payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                },
+            }
+            )
+            return response.data
         } catch (e) {
             setLoading(false)
             console.error(e);
@@ -50,17 +61,9 @@ export const NetworkProvider = ({ children }) => {
 
     async function apiGet(endpoint) {
         console.log("Making get network request")
-        let token;
         setLoading(true)
-        try {
-            token = await getAccessTokenSilently({
-                audience: 'identity-lock',
-            });
-        } catch (e) {
-            token = await getAccessTokenWithPopup({
-                audience: 'identity-lock',
-            })
-        }
+
+        const token = await getToken()
 
         console.log(token)
 
@@ -70,9 +73,7 @@ export const NetworkProvider = ({ children }) => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            let resp = await response.data()
-            setLoading(false)
-            return resp
+            return response.data
 
         } catch (e) {
             setLoading(false)
@@ -103,6 +104,7 @@ export const NetworkProvider = ({ children }) => {
             loading,
             error,
             apiPost,
+            imagePost,
             apiGet,
             getToken,
         }),
@@ -118,7 +120,6 @@ export const NetworkProvider = ({ children }) => {
     );
 }
 
-// Let's only export the `useAuth` hook instead of the context.
 // We only want to use the hook directly and never the context component.
 export default function useNetwork() {
     return useContext(NetworkContext);

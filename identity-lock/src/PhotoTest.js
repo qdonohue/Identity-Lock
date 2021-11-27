@@ -1,6 +1,7 @@
-import { useRef, useCallback } from "react";
-
 import Webcam from "react-webcam";
+import useNetwork from "./Network/useNetwork";
+
+import { useCallback, useRef, useState } from "react";
 
 const videoConstraints = {
     width: 1280,
@@ -8,13 +9,24 @@ const videoConstraints = {
     facingMode: "user"
 };
 
-export const ProfilePhoto = ({handleImage}) => {
+
+
+export const PhotoTest = () => {
     const webcamRef = useRef(null);
+    const { imagePost } = useNetwork()
+    const [userCount, setUserCount] = useState(null)
 
     const capture = useCallback(
-        () => {
+        async () => {
             const imageSrc = webcamRef.current.getScreenshot();
-            handleImage(imageSrc)
+
+            const blob = await (await fetch(imageSrc)).blob()
+            const data = new FormData()
+            data.append('image', blob)
+
+            const resp = await imagePost('/api/detect', data)
+            console.log(resp)
+            setUserCount(resp.FaceCount)
         },
         [webcamRef]
     );
@@ -22,8 +34,11 @@ export const ProfilePhoto = ({handleImage}) => {
     return (
         <div className="flex flex-col flex-grow justify-center bg-blue-800 items-center text-white rounded-lg border shadow-lg p-10 my-10 min-w-full">
             <div className="text-white font-bold text-2xl text-center">
-                Lets get a photo to recognize you.
+                PHOTO TEST
             </div>
+            {userCount && <div className="text-white font-bold text-l text-center">
+                There are {userCount} people in the image.
+            </div>}
             <Webcam
                 className="p-5"
                 audio={false}
@@ -43,4 +58,6 @@ export const ProfilePhoto = ({handleImage}) => {
             </button>
         </div>
     );
-};
+
+
+}

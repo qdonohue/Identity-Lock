@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"path"
 	"strconv"
@@ -16,9 +17,55 @@ type Ml struct {
 	context    *context.Context
 }
 
+type ImageCheck struct {
+	Permitted bool
+	FaceCount int
+}
+
 func NewMl(client *face.Client, context *context.Context) *Ml {
 
 	return &Ml{faceClient: client, context: context}
+}
+
+func (ml *Ml) DetectFaceStream(io io.ReadCloser) ImageCheck {
+	// Detect a face in an image that contains a single face
+	// Array types chosen for the attributes of Face
+	attributes := []face.AttributeType{"age", "emotion", "gender"}
+	returnFaceID := true
+	returnRecognitionModel := false
+	returnFaceLandmarks := false
+
+	// API call to detect faces in single-faced image, using recognition model 4
+	// We specify detection model 1 because we are retrieving attributes.
+	detectSingleFaces, dErr := ml.faceClient.DetectWithStream(*ml.context, io, &returnFaceID, &returnFaceLandmarks, attributes, face.Recognition01, &returnRecognitionModel, face.Detection01)
+	if dErr != nil {
+		log.Fatal(dErr)
+	}
+
+	// Dereference *[]DetectedFace, in order to loop through it.
+	dFaces := *detectSingleFaces.Value
+
+	if len(dFaces) > 0 {
+		fmt.Println("Detected face in with ID(s): ")
+		fmt.Println(dFaces[0].FaceID)
+		fmt.Println()
+	}
+	// Find/display the age and gender attributes
+	for _, dFace := range dFaces {
+		fmt.Println("Face attributes:")
+		fmt.Printf("  Age: %.0f", *dFace.FaceAttributes.Age)
+		fmt.Println("\n  Gender: " + dFace.FaceAttributes.Gender)
+	}
+
+	faceCount := len(dFaces)
+
+	permitted := faceCount == 1
+
+	fmt.Println("Detected face count: ")
+	fmt.Println(len(dFaces))
+
+	return ImageCheck{Permitted: permitted, FaceCount: faceCount}
+
 }
 
 func (ml *Ml) DetectFace() {

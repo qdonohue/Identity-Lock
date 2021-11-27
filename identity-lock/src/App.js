@@ -17,6 +17,7 @@ import { Alerts } from './Alerts';
 import './App.css';
 import { DocumentView } from './Document/DocumentView';
 import { ProfilePage } from './ProfilePage';
+import {PhotoTest} from './PhotoTest'
 
 
 function App() {
@@ -54,6 +55,9 @@ function App() {
               </Route>
               <Route path="/profile">
                 <ProfilePage />
+              </Route>
+              <Route path="/test">
+                <PhotoTest />
               </Route>
               <Route path="/viewdocument/:documentID">
                 <DocumentView />
