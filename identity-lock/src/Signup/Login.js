@@ -12,7 +12,7 @@ export const Login = ({ setNextStep }) => {
 
     if (!isAuthenticated) {
         return (
-            <div class="flex justify-top bg-gray-800 items-center flex-col text-white font-bold rounded-lg border shadow-lg p-10 h-96">
+            <div className="flex justify-top bg-gray-800 items-center flex-col text-white font-bold rounded-lg border shadow-lg p-10 h-96">
                 <div className="text-center font-bold text-2xl">
                     Welcome to Identity Lock!
                 </div>
@@ -34,7 +34,7 @@ export const Login = ({ setNextStep }) => {
     return (
         <div className="flex flex-col flex-grow justify-center bg-blue-800 items-center text-white rounded-lg border shadow-lg p-10 my-10 w-100">
 
-            <img src={user.picture} alt="Profile Picture" class="w-36 h-36 rounded-full object-cover" />
+            <img src={user.picture} alt="Profile Picture" className="w-36 h-36 rounded-full object-cover" />
             <div className="text-center font-bold text-2xl ">
                 Hello {user.given_name}!
             </div>
