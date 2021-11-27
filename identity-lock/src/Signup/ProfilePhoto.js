@@ -1,7 +1,6 @@
 import { useRef, useCallback } from "react";
 
 import Webcam from "react-webcam";
-import { SIGNUP_STEP } from "./utils";
 
 const videoConstraints = {
     width: 1280,
