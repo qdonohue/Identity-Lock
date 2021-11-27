@@ -92,6 +92,7 @@ export const NetworkProvider = ({ children }) => {
                 audience: 'identity-lock',
             })
         }
+        console.log(token)
         setLoading(false)
         return token;
     }
