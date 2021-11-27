@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -28,7 +29,6 @@ func pong(w http.ResponseWriter, r *http.Request) {
 
 func ReceiveFile(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20) // limit your max input length!
-	// in your case file would be fileupload
 	file, header, err := r.FormFile("file")
 	if err != nil {
 		panic(err)
@@ -36,12 +36,16 @@ func ReceiveFile(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 	name := strings.Split(header.Filename, ".")
 	fmt.Printf("File name %s\n", name[0])
-	f, err := os.OpenFile("./downloaded", os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := ioutil.TempFile("static", "uploadFile-*.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer f.Close()
+
 	io.Copy(f, file)
 	// do something else
 	// etc write header
-	return
+	w.Write([]byte("File uploaded!"))
 }
 
 func NewApp() *App {
