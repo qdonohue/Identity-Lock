@@ -74,8 +74,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 				log.Println(userSub)
 
 				err := db.DB.Where("sub = ?", userSub).First(&user).Error
-				//db.DB.First(&user)
-				// err := db.DB.First(&user, userSub)
 
 				// User needs to be created
 				if err != nil {

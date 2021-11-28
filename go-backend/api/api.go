@@ -64,7 +64,7 @@ func (api *Api) UserExists(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	err := db.DB.Where("sub = ?", sub).First(&user).Error
 
-	registered := (err == gorm.ErrRecordNotFound)
+	registered := (err != gorm.ErrRecordNotFound)
 	data := map[string]bool{"Registered": registered}
 	body, err := json.Marshal(data)
 	w.WriteHeader(http.StatusOK)

@@ -36,9 +36,9 @@ export const Login = ({ setNextStep }) => {
 
             <img src={user.picture} alt="Profile Picture" className="w-36 h-36 rounded-full object-cover" />
             <div className="text-center font-bold text-2xl ">
-                Hello {user.given_name}!
+                Hello {user.given_name}
             </div>
-            <div className="text-center text-base">Does this look right to you?</div>
+            <div className="text-center text-base">Let's get going!</div>
             <Profile user={user} />
             <button
                 onClick={() => {setNextStep(SIGNUP_STEP.PHOTO)}}
