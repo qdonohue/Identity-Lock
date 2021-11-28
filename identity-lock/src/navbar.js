@@ -30,8 +30,6 @@ export default function NavBar() {
     const location = useLocation();
     const history = useHistory();
 
-    console.log("Nav bar registered: " + registered)
-
     const formattedName = isAuthenticated && formatName(user.name)
 
     const navigation = isAuthenticated && registered ? signedInNavigation : signedOutNavigation

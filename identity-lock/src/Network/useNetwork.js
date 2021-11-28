@@ -22,7 +22,6 @@ export const NetworkProvider = ({ children }) => {
 
     function registrationNeeded(response) {
         if (response.data["UserNotFound"] == true) {
-            console.log("Registration needed")
             history.push('/signup')
         }
     }
@@ -30,7 +29,6 @@ export const NetworkProvider = ({ children }) => {
     // Hack for now --> it'll check if we are registered via backend middleware / forced redirect
     useEffect(async () => {
         const resp = await apiGet("/api/userexists")
-        console.log(resp["Registered"])
         setRegistered(resp["Registered"])
     }, [isAuthenticated])
 
@@ -48,7 +46,6 @@ export const NetworkProvider = ({ children }) => {
             });
             setLoading(false)
             if (registrationNeeded(response)) {
-                console.log("Registration needed")
                 logout()
                 history.pushState('/signup')
                 return
@@ -78,10 +75,6 @@ export const NetworkProvider = ({ children }) => {
                 },
             }
             )
-            if (registrationNeeded(response)) {
-                console.log("Registration needed")
-                history.pushState('/signup')
-            }
             return response
         } catch (e) {
             if (e.response && e?.response?.status == 400) {
