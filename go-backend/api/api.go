@@ -16,29 +16,14 @@ type Api struct {
 }
 
 func NewApi(ml *ml.Ml) *Api {
-
 	return &Api{ml: ml}
-
 }
 
-// func DetectFace(w http.ResponseWriter, r *http.Request) {
-// 	r.ParseMultipartForm(32 << 20) // limit your max input length!
-// 	file, header, err := r.FormFile("file")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	defer file.Close()
-// 	name := strings.Split(header.Filename, ".")
-// 	fmt.Printf("File name %s\n", name[0])
-// 	f, err := ioutil.TempFile("static", "uploadFile-*.png")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	defer f.Close()
-// 	// do something else
-// 	// etc write header
-// 	w.Write([]byte("File uploaded!"))
-// }
+const USER_REGISTRATION_ENDPOINT string = "/api/register"
+
+func (api *Api) RegisterUser(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("You tried to register"))
+}
 
 func (api *Api) DetectFace(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20) // limit your max input length!
@@ -70,5 +55,6 @@ func (api *Api) DetectFace(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Api) RegisterRoutes(r *mux.Router) {
+	r.HandleFunc(USER_REGISTRATION_ENDPOINT, a.RegisterUser)
 	r.HandleFunc("/api/detect", a.DetectFace)
 }

@@ -1,6 +1,9 @@
 package middleware
 
 import (
+	"Identity-Lock/go-backend/api"
+	"Identity-Lock/go-backend/db"
+	"Identity-Lock/go-backend/models"
 	"context"
 	"crypto/rsa"
 	"encoding/json"
@@ -12,6 +15,15 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 )
+
+type AuthError struct {
+	Error        string
+	UserNotFound bool
+}
+
+type ContextKey string
+
+const ContextUserKey ContextKey = "user"
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +58,35 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			claims := token.Claims.(jwt.MapClaims)
 
 			if validClaims(&claims) {
-				ctx := context.WithValue(r.Context(), "props", claims)
+
+				userSub := claims["sub"].(string)
+
+				ctx := context.WithValue(r.Context(), ContextUserKey, userSub)
+
+				if r.RequestURI == api.USER_REGISTRATION_ENDPOINT {
+					log.Println("Registration endpoint hit")
+					next.ServeHTTP(w, r.WithContext(ctx))
+					return
+				}
+
+				// Check for user account
+				var user models.User
+
+				err := db.DB.Where("sub = ?", userSub).First(user)
+
+				// User needs to be created
+				if err != nil {
+					resp, err := json.Marshal(&AuthError{Error: "User not in DB", UserNotFound: true})
+					if err != nil {
+						log.Fatalln("Shit happened in auth")
+					}
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write(resp)
+					return
+				}
+
+				//ctx := context.WithValue(r.Context(), ContextUserKey, user)
 				// Access context values in handlers like this
 				// props, _ := r.Context().Value("props").(jwt.MapClaims)
 				next.ServeHTTP(w, r.WithContext(ctx))

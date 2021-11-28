@@ -5,12 +5,9 @@ import (
 	"Identity-Lock/go-backend/middleware"
 	"Identity-Lock/go-backend/ml"
 	"context"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/services/cognitiveservices/v1.0/face"
 	"github.com/Azure/go-autorest/autorest"
@@ -25,44 +22,6 @@ type App struct {
 
 func pong(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("pong"))
-}
-
-func ReceiveFile(w http.ResponseWriter, r *http.Request) {
-	r.ParseMultipartForm(32 << 20) // limit your max input length!
-	file, header, err := r.FormFile("file")
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	name := strings.Split(header.Filename, ".")
-	fmt.Printf("File name %s\n", name[0])
-	f, err := ioutil.TempFile("static", "uploadFile-*.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	// do something else
-	// etc write header
-	w.Write([]byte("File uploaded!"))
-}
-
-func DetectFace(w http.ResponseWriter, r *http.Request) {
-	r.ParseMultipartForm(32 << 20) // limit your max input length!
-	file, header, err := r.FormFile("file")
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	name := strings.Split(header.Filename, ".")
-	fmt.Printf("File name %s\n", name[0])
-	f, err := ioutil.TempFile("static", "uploadFile-*.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	// do something else
-	// etc write header
-	w.Write([]byte("File uploaded!"))
 }
 
 func NewApp() *App {
@@ -82,7 +41,6 @@ func NewApp() *App {
 	r := mux.NewRouter()
 	api.RegisterRoutes(r)
 	r.HandleFunc("/ping", pong)
-	r.HandleFunc("/file", ReceiveFile).Methods("POST")
 
 	r.Use(middleware.LoggingMiddleware)
 	r.Use(middleware.AuthMiddleware)

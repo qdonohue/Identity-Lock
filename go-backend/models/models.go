@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 type User struct {
 	gorm.Model
 	Email      string `gorm:"primaryKey"`
+	Sub        string `gorm:"primaryKey"`
 	Name       string
 	Documents  []Document  `gorm:"foreignKey:ID"`
 	Contacts   []User      `gorm:"foreignKey:Email"`
