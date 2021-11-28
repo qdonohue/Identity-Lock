@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"Identity-Lock/go-backend/api"
+	"Identity-Lock/go-backend/app_constants"
 	"Identity-Lock/go-backend/db"
 	"Identity-Lock/go-backend/models"
 	"context"
@@ -14,16 +14,13 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
+	"gorm.io/gorm"
 )
 
 type AuthError struct {
 	Error        string
 	UserNotFound bool
 }
-
-type ContextKey string
-
-const ContextUserKey ContextKey = "user"
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -59,12 +56,14 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 			if validClaims(&claims) {
 
-				userSub := claims["sub"].(string)
+				sub := claims["sub"].(string)
 
-				ctx := context.WithValue(r.Context(), ContextUserKey, userSub)
+				// Extract just the last portion of the sub
+				userSub := strings.Split(sub, "|")[1]
 
-				if r.RequestURI == api.USER_REGISTRATION_ENDPOINT {
-					log.Println("Registration endpoint hit")
+				ctx := context.WithValue(r.Context(), app_constants.ContextUserKey, userSub)
+
+				if r.RequestURI == app_constants.USER_REGISTRATION_ENDPOINT || r.RequestURI == app_constants.USER_EXISTS_ENDPOINT {
 					next.ServeHTTP(w, r.WithContext(ctx))
 					return
 				}
@@ -72,10 +71,19 @@ func AuthMiddleware(next http.Handler) http.Handler {
 				// Check for user account
 				var user models.User
 
-				err := db.DB.Where("sub = ?", userSub).First(user)
+				log.Println(userSub)
+
+				err := db.DB.Where("sub = ?", userSub).First(&user).Error
+				//db.DB.First(&user)
+				// err := db.DB.First(&user, userSub)
 
 				// User needs to be created
 				if err != nil {
+					if err != gorm.ErrRecordNotFound {
+						w.WriteHeader(http.StatusInternalServerError)
+						w.Write([]byte("Unexpected server error"))
+						return
+					}
 					resp, err := json.Marshal(&AuthError{Error: "User not in DB", UserNotFound: true})
 					if err != nil {
 						log.Fatalln("Shit happened in auth")

@@ -2,6 +2,7 @@ package app
 
 import (
 	"Identity-Lock/go-backend/api"
+	"Identity-Lock/go-backend/app_constants"
 	"Identity-Lock/go-backend/middleware"
 	"Identity-Lock/go-backend/ml"
 	"context"
@@ -21,6 +22,7 @@ type App struct {
 }
 
 func pong(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.Context().Value(app_constants.ContextUserKey).(string))
 	w.Write([]byte("pong"))
 }
 
