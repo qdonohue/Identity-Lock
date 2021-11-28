@@ -70,9 +70,6 @@ func NewApp() *App {
 	face_key := os.Getenv("FACE_SUBSCRIPTION_KEY")
 	face_endpoint := os.Getenv("FACE_ENDPOINT")
 
-	fmt.Printf("FACE KEY %s", face_key)
-	fmt.Printf("FACE end %s", face_endpoint)
-
 	client := face.NewClient(face_endpoint)
 	client.Authorizer = autorest.NewCognitiveServicesAuthorizer(face_key)
 
@@ -91,11 +88,9 @@ func NewApp() *App {
 	r.Use(middleware.AuthMiddleware)
 
 	return &App{router: r, ml: ml}
-
 }
 
 func (app *App) Run() {
-	// app.ml.DetectFace()
 	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}), handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}), handlers.AllowedOrigins([]string{"*"}))(app.router)))
 
 }
