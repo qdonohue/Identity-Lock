@@ -1,23 +1,38 @@
 import React, {
     createContext,
     useContext,
+    useEffect,
     useMemo,
     useState,
 } from "react"
 
 import { useAuth0 } from "@auth0/auth0-react"
 import axios from 'axios'
+import {useHistory } from "react-router"
 
 const NetworkContext = createContext()
 
 // Export the provider as we need to wrap the entire app with it
 export const NetworkProvider = ({ children }) => {
-    const { getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0();
+    const { getAccessTokenSilently, getAccessTokenWithPopup, logout, isAuthenticated } = useAuth0();
+    const history = useHistory();
     const [loading, setLoading] = useState(false);
+    const [registered, setRegistered] = useState(false);
     const [error, setError] = useState(null);
 
+    function registrationNeeded(response) {
+        if (response.data["UserNotFound"] == true) {
+            history.push('/signup')
+        }
+    }
+
+    // Hack for now --> it'll check if we are registered via backend middleware / forced redirect
+    useEffect(async () => {
+        const resp = await apiGet("/api/userexists")
+        setRegistered(resp["Registered"])
+    }, [isAuthenticated])
+
     async function apiPost(endpoint, payload) {
-        console.log("Making network request")
         setLoading(true)
         const token = await getToken()
 
@@ -30,15 +45,23 @@ export const NetworkProvider = ({ children }) => {
                 },
             });
             setLoading(false)
+            if (registrationNeeded(response)) {
+                logout()
+                history.pushState('/signup')
+                return
+            }
             return response.data
 
         } catch (e) {
+            if (e.response && e?.response?.status == 400) {
+                registrationNeeded(e.response)
+            }
             setLoading(false)
             console.error(e);
         }
     }
 
-    async function imagePost(endpoint, payload) {
+    async function multipartFormPost(endpoint, payload) {
         setLoading(true)
 
         const token = await getToken()
@@ -52,8 +75,11 @@ export const NetworkProvider = ({ children }) => {
                 },
             }
             )
-            return response.data
+            return response
         } catch (e) {
+            if (e.response && e?.response?.status == 400) {
+                registrationNeeded(e.response)
+            }
             setLoading(false)
             console.error(e);
         }
@@ -73,9 +99,15 @@ export const NetworkProvider = ({ children }) => {
                     Authorization: `Bearer ${token}`,
                 },
             });
+            console.log("Registration not needed")
+            console.log(response)
+            console.log(response.data)
             return response.data
 
         } catch (e) {
+            if (e.response && e?.response?.status == 400) {
+                registrationNeeded(e.response)
+            }
             setLoading(false)
             console.error(e);
         }
@@ -104,11 +136,13 @@ export const NetworkProvider = ({ children }) => {
             loading,
             error,
             apiPost,
-            imagePost,
+            multipartFormPost,
             apiGet,
             getToken,
+            registered,
+            setRegistered,
         }),
-        [loading, error]
+        [loading, error, registered]
     );
 
     // We only want to render the underlying app after we

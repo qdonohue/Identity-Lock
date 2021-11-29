@@ -1,7 +1,10 @@
 package api
 
 import (
+	"Identity-Lock/go-backend/app_constants"
+	"Identity-Lock/go-backend/db"
 	"Identity-Lock/go-backend/ml"
+	"Identity-Lock/go-backend/models"
 	"fmt"
 	"io"
 	"log"
@@ -9,6 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"gopkg.in/square/go-jose.v2/json"
+	"gorm.io/gorm"
 )
 
 type Api struct {
@@ -16,29 +20,57 @@ type Api struct {
 }
 
 func NewApi(ml *ml.Ml) *Api {
-
 	return &Api{ml: ml}
-
 }
 
-// func DetectFace(w http.ResponseWriter, r *http.Request) {
-// 	r.ParseMultipartForm(32 << 20) // limit your max input length!
-// 	file, header, err := r.FormFile("file")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	defer file.Close()
-// 	name := strings.Split(header.Filename, ".")
-// 	fmt.Printf("File name %s\n", name[0])
-// 	f, err := ioutil.TempFile("static", "uploadFile-*.png")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	defer f.Close()
-// 	// do something else
-// 	// etc write header
-// 	w.Write([]byte("File uploaded!"))
-// }
+func (api *Api) RegisterUser(w http.ResponseWriter, r *http.Request) {
+	// User name
+	// Email address
+	// Sub (already have)
+	// Photo?
+	r.ParseMultipartForm(32 << 20)
+
+	sub := r.Context().Value(app_constants.ContextUserKey).(string)
+
+	img, _, err := r.FormFile("image")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	faceID := api.ml.RegisterUserFace(io.NopCloser(img))
+
+	log.Println(faceID)
+
+	name := r.Form.Get("name")
+	email := r.Form.Get("email")
+
+	user := models.User{Email: email, Name: name, Sub: sub, FaceKey: faceID}
+
+	result := db.DB.Create(&user)
+
+	if result.Error != nil {
+		log.Fatal(result.Error)
+		http.Error(w, "User registration error in DB", http.StatusBadRequest)
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+	w.Write([]byte("User registered successfully"))
+}
+
+func (api *Api) UserExists(w http.ResponseWriter, r *http.Request) {
+	sub := r.Context().Value(app_constants.ContextUserKey).(string)
+
+	var user models.User
+	err := db.DB.Where("sub = ?", sub).First(&user).Error
+
+	registered := (err != gorm.ErrRecordNotFound)
+	data := map[string]bool{"Registered": registered}
+	body, err := json.Marshal(data)
+	w.WriteHeader(http.StatusOK)
+
+	w.Write(body)
+}
 
 func (api *Api) DetectFace(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20) // limit your max input length!
@@ -61,14 +93,13 @@ func (api *Api) DetectFace(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	fmt.Println("analysis data")
-	fmt.Println(body)
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(body)
 }
 
 func (a *Api) RegisterRoutes(r *mux.Router) {
+	r.HandleFunc(app_constants.USER_REGISTRATION_ENDPOINT, a.RegisterUser)
+	r.HandleFunc(app_constants.USER_EXISTS_ENDPOINT, a.UserExists)
 	r.HandleFunc("/api/detect", a.DetectFace)
 }

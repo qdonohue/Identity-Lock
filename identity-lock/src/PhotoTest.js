@@ -13,7 +13,7 @@ const videoConstraints = {
 
 export const PhotoTest = () => {
     const webcamRef = useRef(null);
-    const { imagePost } = useNetwork()
+    const { multipartFormPost } = useNetwork()
     const [userCount, setUserCount] = useState(null)
 
     const capture = useCallback(
@@ -24,7 +24,7 @@ export const PhotoTest = () => {
             const data = new FormData()
             data.append('image', blob)
 
-            const resp = await imagePost('/api/detect', data)
+            const resp = await multipartFormPost('/api/detect', data)
             console.log(resp)
             setUserCount(resp.FaceCount)
         },

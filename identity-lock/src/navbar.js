@@ -10,6 +10,7 @@ import { formatName } from './Utility/name'
 import { classNames } from './Utility/tailwindHelper'
 
 import logo from './FullLogo.jpg'
+import useNetwork from './Network/useNetwork'
 
 const signedInNavigation = [
     { name: 'Home', path: '/home', id: 1 },
@@ -25,12 +26,13 @@ const signedOutNavigation = [
 
 export default function NavBar() {
     const { isAuthenticated, user, loginWithPopup, logout } = useAuth0();
+    const { registered } = useNetwork()
     const location = useLocation();
     const history = useHistory();
 
     const formattedName = isAuthenticated && formatName(user.name)
 
-    const navigation = isAuthenticated ? signedInNavigation : signedOutNavigation
+    const navigation = isAuthenticated && registered ? signedInNavigation : signedOutNavigation
 
     return (
         <Disclosure as="nav" className="bg-gray-800">
@@ -73,7 +75,7 @@ export default function NavBar() {
                                 </button> */}
 
                             {/* Profile dropdown */}
-                            {isAuthenticated ? <Menu as="div" className="ml-3 relative">
+                            {isAuthenticated ? (registered ? <Menu as="div" className="ml-3 relative">
                                 <div>
                                     <Menu.Button className={'text-gray-300 hover:bg-gray-700 hover:text-white' +
                                         'px-3 py-2 rounded-md text-sm font-medium'}>
@@ -94,7 +96,7 @@ export default function NavBar() {
                                         <Menu.Item>
                                             {({ active }) => (
                                                 <Link to={'/profile'}>
-                                                    <div onClick={() => {history.push('/profile') }} className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
+                                                    <div onClick={() => { history.push('/profile') }} className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
                                                         Profile
                                                     </div>
                                                 </Link>
@@ -109,7 +111,9 @@ export default function NavBar() {
                                         </Menu.Item>
                                     </Menu.Items>
                                 </Transition>
-                            </Menu> : <div onClick={loginWithPopup} className={'text-gray-300 hover:bg-gray-700 hover:text-white' +
+                            </Menu> : <div onClick={() => {history.push('/signup')}} className={'text-white hover:bg-gray-700 hover:text-white' +
+                                'px-3 py-2 rounded-md text-sm font-medium'}>Registration Incomplete</div>
+                                ) : <div onClick={loginWithPopup} className={'text-gray-300 hover:bg-gray-700 hover:text-white' +
                                 'px-3 py-2 rounded-md text-sm font-medium'}>Log in</div>}
                         </div>
                     </div>

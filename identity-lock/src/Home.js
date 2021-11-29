@@ -12,7 +12,6 @@ export const Home = () => {
     const [token, setToken] = useState(null)
     async function network() {
         console.log(await apiGet('/ping'))
-        //console.log(await apiPost('/api/private', {}))
     }
 
     return (

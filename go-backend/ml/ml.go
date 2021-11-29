@@ -27,6 +27,10 @@ func NewMl(client *face.Client, context *context.Context) *Ml {
 	return &Ml{faceClient: client, context: context}
 }
 
+func (ml *Ml) RegisterUserFace(io io.ReadCloser) string {
+	return "1234567"
+}
+
 func (ml *Ml) DetectFaceStream(io io.ReadCloser) ImageCheck {
 	// Detect a face in an image that contains a single face
 	// Array types chosen for the attributes of Face
