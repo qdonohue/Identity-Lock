@@ -39,6 +39,9 @@ func main() {
 	personGroupClient := face.NewPersonGroupClient(face_endpoint)
 	personGroupClient.Authorizer = autorest.NewCognitiveServicesAuthorizer(face_key)
 
+	// TERRIBLE HACK FOR LOCAL TESTING:
+	personGroupClient.Delete(cnt, person_group_label)
+
 	metadata := face.MetaDataContract{Name: &person_group_label}
 
 	fmt.Println("Person group ID: " + person_group_label)
@@ -52,7 +55,7 @@ func main() {
 		log.Fatal("Error creating person group")
 	}
 
-	defer personGroupClient.Delete(cnt, person_group_label)
+	//defer personGroupClient.Delete(cnt, person_group_label)
 
 	personGroupPersonClient := face.NewPersonGroupPersonClient(face_endpoint)
 	personGroupPersonClient.Authorizer = autorest.NewCognitiveServicesAuthorizer(face_key)

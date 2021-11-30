@@ -17,6 +17,7 @@ const signedInNavigation = [
     { name: 'Documents', path: '/documents', id: 2 },
     { name: 'Contacts', path: '/contacts', id: 3 },
     { name: 'Alerts', path: '/alerts', id: 4 },
+    { name: 'Tech demo', path: '/test', id: 5 },
 ]
 
 const signedOutNavigation = [

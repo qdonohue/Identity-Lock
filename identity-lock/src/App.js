@@ -17,7 +17,7 @@ import { Alerts } from './Alerts';
 import './App.css';
 import { DocumentView } from './Document/DocumentView';
 import { ProfilePage } from './ProfilePage';
-import {PhotoTest} from './PhotoTest'
+import {FaceVerificationDemo} from './Testing/FaceVerificationDemo'
 
 
 function App() {
@@ -57,7 +57,7 @@ function App() {
                 <ProfilePage />
               </Route>
               <Route path="/test">
-                <PhotoTest />
+                <FaceVerificationDemo />
               </Route>
               <Route path="/viewdocument/:documentID">
                 <DocumentView />
