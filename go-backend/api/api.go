@@ -30,7 +30,7 @@ func (api *Api) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	// Photo?
 	r.ParseMultipartForm(32 << 20)
 
-	sub := r.Context().Value(app_constants.ContextUserKey).(string)
+	sub := r.Context().Value(app_constants.ContextSubKey).(string)
 
 	img, _, err := r.FormFile("image")
 	if err != nil {
@@ -60,7 +60,7 @@ func (api *Api) RegisterUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *Api) UserExists(w http.ResponseWriter, r *http.Request) {
-	sub := r.Context().Value(app_constants.ContextUserKey).(string)
+	sub := r.Context().Value(app_constants.ContextSubKey).(string)
 
 	var user models.User
 	err := db.DB.Where("sub = ?", sub).First(&user).Error
@@ -83,7 +83,9 @@ func (api *Api) DetectFace(w http.ResponseWriter, r *http.Request) {
 
 	rc := io.NopCloser(file)
 
-	analysis := api.ml.DetectFaceStream(rc)
+	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
+
+	analysis := api.ml.VerifyFaceFromStream(user.FaceKey, rc)
 
 	fmt.Println("analysis data")
 	fmt.Println(analysis)

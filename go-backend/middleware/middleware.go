@@ -61,7 +61,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 				// Extract just the last portion of the sub
 				userSub := strings.Split(sub, "|")[1]
 
-				ctx := context.WithValue(r.Context(), app_constants.ContextUserKey, userSub)
+				ctx := context.WithValue(r.Context(), app_constants.ContextSubKey, userSub)
 
 				if r.RequestURI == app_constants.USER_REGISTRATION_ENDPOINT || r.RequestURI == app_constants.USER_EXISTS_ENDPOINT {
 					next.ServeHTTP(w, r.WithContext(ctx))
@@ -70,8 +70,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 				// Check for user account
 				var user models.User
-
-				log.Println(userSub)
 
 				err := db.DB.Where("sub = ?", userSub).First(&user).Error
 
@@ -91,6 +89,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 					w.Write(resp)
 					return
 				}
+
+				ctx = context.WithValue(ctx, app_constants.ContextUserKey, user)
 
 				//ctx := context.WithValue(r.Context(), ContextUserKey, user)
 				// Access context values in handlers like this
