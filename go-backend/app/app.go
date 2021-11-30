@@ -30,13 +30,26 @@ func NewApp() *App {
 
 	face_key := os.Getenv("FACE_SUBSCRIPTION_KEY")
 	face_endpoint := os.Getenv("FACE_ENDPOINT")
-
-	client := face.NewClient(face_endpoint)
-	client.Authorizer = autorest.NewCognitiveServicesAuthorizer(face_key)
+	person_group_label := os.Getenv("PERSON_GROUP_LABEL")
 
 	cnt := context.Background()
 
-	ml := ml.NewMl(&client, &cnt)
+	// Face API setup
+	client := face.NewClient(face_endpoint)
+	client.Authorizer = autorest.NewCognitiveServicesAuthorizer(face_key)
+	personGroupClient := face.NewPersonGroupClient(face_endpoint)
+	personGroupClient.Authorizer = autorest.NewCognitiveServicesAuthorizer(face_key)
+
+	metadata := face.MetaDataContract{Name: &person_group_label}
+
+	personGroupClient.Create(cnt, person_group_label, metadata)
+
+	defer personGroupClient.Delete(cnt, person_group_label)
+
+	personGroupPersonClient := face.NewPersonGroupPersonClient(face_endpoint)
+	personGroupPersonClient.Authorizer = autorest.NewCognitiveServicesAuthorizer(face_key)
+
+	ml := ml.NewMl(&client, person_group_label, &personGroupClient, &personGroupPersonClient, &cnt)
 
 	api := api.NewApi(ml)
 

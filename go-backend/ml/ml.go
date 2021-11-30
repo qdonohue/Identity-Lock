@@ -10,11 +10,15 @@ import (
 	"strconv"
 
 	"github.com/Azure/azure-sdk-for-go/services/cognitiveservices/v1.0/face"
+	"github.com/gofrs/uuid"
 )
 
 type Ml struct {
-	faceClient *face.Client
-	context    *context.Context
+	faceClient              *face.Client
+	groupName               string
+	personGroupClient       *face.PersonGroupClient
+	personGroupPersonClient *face.PersonGroupPersonClient
+	context                 *context.Context
 }
 
 type ImageCheck struct {
@@ -22,13 +26,26 @@ type ImageCheck struct {
 	FaceCount int
 }
 
-func NewMl(client *face.Client, context *context.Context) *Ml {
+func NewMl(client *face.Client, groupName string, personGroupClient *face.PersonGroupClient, personGroupPersonClient *face.PersonGroupPersonClient, context *context.Context) *Ml {
 
-	return &Ml{faceClient: client, context: context}
+	return &Ml{faceClient: client, personGroupClient: personGroupClient, personGroupPersonClient: personGroupPersonClient, context: context}
 }
 
-func (ml *Ml) RegisterUserFace(io io.ReadCloser) string {
-	return "1234567"
+func (ml *Ml) RegisterUserFace(io io.ReadCloser, sub string) uuid.UUID {
+	user := face.NameAndUserDataContract{Name: &sub}
+
+	userPerson, err := ml.personGroupPersonClient.Create(*ml.context, ml.groupName, user)
+	if err != nil {
+		log.Fatal("ERROR CREATING USER WITH SUB: %s", sub)
+	}
+
+	userID := userPerson.PersonID
+
+	ml.personGroupPersonClient.AddFaceFromStream(*ml.context, ml.groupName, *userID, io, "", nil, face.Detection01)
+
+	ml.personGroupClient.Train(*ml.context, ml.groupName)
+
+	return *userID
 }
 
 func (ml *Ml) DetectFaceStream(io io.ReadCloser) ImageCheck {

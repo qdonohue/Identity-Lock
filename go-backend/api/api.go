@@ -37,7 +37,8 @@ func (api *Api) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	faceID := api.ml.RegisterUserFace(io.NopCloser(img))
+	io := io.NopCloser(img)
+	faceID := api.ml.RegisterUserFace(io, sub)
 
 	log.Println(faceID)
 
