@@ -35,7 +35,6 @@ export const Signup = () => {
         data.append('email', user.email)
 
         const resp = await multipartFormPost('/api/register', data)
-        console.log(resp)
         if (resp.status == 201) {
             console.log('trigger register')
             setRegistered(true)

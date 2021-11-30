@@ -1,6 +1,9 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"github.com/gofrs/uuid"
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
@@ -10,7 +13,7 @@ type User struct {
 	Documents  []Document  `gorm:"foreignKey:ID"`
 	Contacts   []User      `gorm:"foreignKey:Email"`
 	Violations []Violation `gorm:"foreignKey:ID"`
-	FaceKey    string
+	FaceKey    uuid.UUID
 }
 
 type Document struct {

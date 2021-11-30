@@ -5,7 +5,6 @@ import (
 	"Identity-Lock/go-backend/db"
 	"Identity-Lock/go-backend/ml"
 	"Identity-Lock/go-backend/models"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -30,14 +29,15 @@ func (api *Api) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	// Photo?
 	r.ParseMultipartForm(32 << 20)
 
-	sub := r.Context().Value(app_constants.ContextUserKey).(string)
+	sub := r.Context().Value(app_constants.ContextSubKey).(string)
 
 	img, _, err := r.FormFile("image")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	faceID := api.ml.RegisterUserFace(io.NopCloser(img))
+	io := io.NopCloser(img)
+	faceID := api.ml.RegisterUserFace(io, sub)
 
 	log.Println(faceID)
 
@@ -59,7 +59,7 @@ func (api *Api) RegisterUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *Api) UserExists(w http.ResponseWriter, r *http.Request) {
-	sub := r.Context().Value(app_constants.ContextUserKey).(string)
+	sub := r.Context().Value(app_constants.ContextSubKey).(string)
 
 	var user models.User
 	err := db.DB.Where("sub = ?", sub).First(&user).Error
@@ -67,6 +67,9 @@ func (api *Api) UserExists(w http.ResponseWriter, r *http.Request) {
 	registered := (err != gorm.ErrRecordNotFound)
 	data := map[string]bool{"Registered": registered}
 	body, err := json.Marshal(data)
+	if err != nil {
+		log.Println("Error marshelling suer exists data")
+	}
 	w.WriteHeader(http.StatusOK)
 
 	w.Write(body)
@@ -82,10 +85,9 @@ func (api *Api) DetectFace(w http.ResponseWriter, r *http.Request) {
 
 	rc := io.NopCloser(file)
 
-	analysis := api.ml.DetectFaceStream(rc)
+	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
-	fmt.Println("analysis data")
-	fmt.Println(analysis)
+	analysis := api.ml.VerifyFaceFromStream(user.FaceKey, rc)
 
 	body, err := json.Marshal(analysis)
 

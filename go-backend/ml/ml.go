@@ -10,31 +10,76 @@ import (
 	"strconv"
 
 	"github.com/Azure/azure-sdk-for-go/services/cognitiveservices/v1.0/face"
+	"github.com/gofrs/uuid"
 )
 
 type Ml struct {
-	faceClient *face.Client
-	context    *context.Context
+	faceClient              *face.Client
+	groupName               string
+	personGroupClient       *face.PersonGroupClient
+	personGroupPersonClient *face.PersonGroupPersonClient
+	context                 *context.Context
 }
 
 type ImageCheck struct {
-	Permitted bool
-	FaceCount int
+	Permitted  bool
+	Confidence float64
+	FaceCount  int
 }
 
-func NewMl(client *face.Client, context *context.Context) *Ml {
+func NewMl(client *face.Client, groupName string, personGroupClient *face.PersonGroupClient, personGroupPersonClient *face.PersonGroupPersonClient, context *context.Context) *Ml {
 
-	return &Ml{faceClient: client, context: context}
+	return &Ml{faceClient: client, groupName: groupName, personGroupClient: personGroupClient, personGroupPersonClient: personGroupPersonClient, context: context}
 }
 
-func (ml *Ml) RegisterUserFace(io io.ReadCloser) string {
-	return "1234567"
+// https://github.com/Azure-Samples/cognitive-services-quickstart-code/blob/e6202977ef87e1115bd79395d436ae22198586a9/go/Face/FaceQuickstart.go#L425
+func (ml *Ml) RegisterUserFace(io io.ReadCloser, sub string) uuid.UUID {
+
+	// DEBUG: CHECK IF PERSON GROUP EXISTS
+	maxCount := int32(10)
+	includeModel := true
+	lp, err := ml.personGroupClient.List(*ml.context, "", &maxCount, &includeModel)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	arr := *lp.Value
+
+	if len(arr) < 1 {
+		log.Println("No person groups found")
+	}
+
+	for _, group := range arr {
+		log.Println("Group id: ", group.PersonGroupID)
+	}
+
+	user := face.NameAndUserDataContract{Name: &sub}
+
+	log.Println("Person group name: ")
+	log.Println(ml.groupName)
+
+	userPerson, err := ml.personGroupPersonClient.Create(*ml.context, ml.groupName, user)
+	if err != nil {
+		log.Println(err)
+		log.Fatal("ERROR CREATING USER WITH SUB: ", sub)
+	}
+
+	log.Println("User created succesfully")
+	log.Println(userPerson)
+
+	userID := userPerson.PersonID
+
+	ml.personGroupPersonClient.AddFaceFromStream(*ml.context, ml.groupName, *userID, io, "", nil, face.Detection01)
+
+	ml.personGroupClient.Train(*ml.context, ml.groupName)
+
+	return *userID
 }
 
 func (ml *Ml) DetectFaceStream(io io.ReadCloser) ImageCheck {
 	// Detect a face in an image that contains a single face
 	// Array types chosen for the attributes of Face
-	attributes := []face.AttributeType{"age", "emotion", "gender"}
+	attributes := []face.AttributeType{}
 	returnFaceID := true
 	returnRecognitionModel := false
 	returnFaceLandmarks := false
@@ -54,22 +99,56 @@ func (ml *Ml) DetectFaceStream(io io.ReadCloser) ImageCheck {
 		fmt.Println(dFaces[0].FaceID)
 		fmt.Println()
 	}
-	// Find/display the age and gender attributes
-	for _, dFace := range dFaces {
-		fmt.Println("Face attributes:")
-		fmt.Printf("  Age: %.0f", *dFace.FaceAttributes.Age)
-		fmt.Println("\n  Gender: " + dFace.FaceAttributes.Gender)
-	}
 
 	faceCount := len(dFaces)
 
 	permitted := faceCount == 1
 
-	fmt.Println("Detected face count: ")
-	fmt.Println(len(dFaces))
-
 	return ImageCheck{Permitted: permitted, FaceCount: faceCount}
+}
 
+func (ml *Ml) VerifyFaceFromStream(faceKey uuid.UUID, io io.ReadCloser) ImageCheck {
+	// Detect a face in an image that contains a single face
+	// Array types chosen for the attributes of Face
+	attributes := []face.AttributeType{}
+	returnFaceID := true
+	returnRecognitionModel := false
+	returnFaceLandmarks := false
+
+	detectSingleFaces, dErr := ml.faceClient.DetectWithStream(*ml.context, io, &returnFaceID, &returnFaceLandmarks, attributes, face.Recognition01, &returnRecognitionModel, face.Detection01)
+	if dErr != nil {
+		log.Fatal(dErr)
+	}
+
+	// Dereference *[]DetectedFace, in order to loop through it.
+	dFaces := *detectSingleFaces.Value
+
+	if len(dFaces) > 0 {
+		fmt.Println("Detected face in with ID(s): ")
+		fmt.Println(dFaces[0].FaceID)
+		fmt.Println()
+	}
+
+	faceCount := len(dFaces)
+
+	if faceCount != 1 {
+		return ImageCheck{Permitted: false, Confidence: float64(1), FaceCount: faceCount}
+	}
+
+	foundFace := dFaces[0]
+
+	// At this point, we know that there is 1 user in the image - gotta verify it's the right one
+	verifyRequest := face.VerifyFaceToPersonRequest{FaceID: foundFace.FaceID, PersonGroupID: &ml.groupName, PersonID: &faceKey}
+
+	verifyResult, err := ml.faceClient.VerifyFaceToPerson(*ml.context, verifyRequest)
+	if err != nil {
+		log.Println("Error in face verification")
+		log.Fatal(err)
+	}
+
+	log.Println("Face is a match!")
+
+	return ImageCheck{Permitted: *verifyResult.IsIdentical, Confidence: *verifyResult.Confidence, FaceCount: faceCount}
 }
 
 func (ml *Ml) DetectFace() {
