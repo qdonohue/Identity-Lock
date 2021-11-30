@@ -5,7 +5,6 @@ import (
 	"Identity-Lock/go-backend/db"
 	"Identity-Lock/go-backend/ml"
 	"Identity-Lock/go-backend/models"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -68,6 +67,9 @@ func (api *Api) UserExists(w http.ResponseWriter, r *http.Request) {
 	registered := (err != gorm.ErrRecordNotFound)
 	data := map[string]bool{"Registered": registered}
 	body, err := json.Marshal(data)
+	if err != nil {
+		log.Println("Error marshelling suer exists data")
+	}
 	w.WriteHeader(http.StatusOK)
 
 	w.Write(body)
@@ -86,9 +88,6 @@ func (api *Api) DetectFace(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
 	analysis := api.ml.VerifyFaceFromStream(user.FaceKey, rc)
-
-	fmt.Println("analysis data")
-	fmt.Println(analysis)
 
 	body, err := json.Marshal(analysis)
 
