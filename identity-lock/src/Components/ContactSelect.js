@@ -9,11 +9,14 @@ const options = [
     { value: "Scott Donohue", label: "Scott Donohue" },
 ]
 
-export const ContactSelect = () => {
-    const [inputValue, setInputValue] = useState(null)
+export const ContactSelect = ({setSharedList}) => {
 
     const loadOptions = async (inputValue) => {
         return options
+    }
+
+    const manageChange = (selected) => {
+        setSharedList(selected)
     }
 
     return (
@@ -22,7 +25,8 @@ export const ContactSelect = () => {
             cacheOptions
             defaultOptions
             loadOptions={loadOptions}
-            onInputChange={(input) => setInputValue(input)}
+            onChange={manageChange}
+            onInputChange={manageChange}
         />
     );
 }
