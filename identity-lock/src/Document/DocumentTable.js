@@ -9,6 +9,9 @@ const distributedBadge = (sent) => {
 
 export const DocumentTable = ({documents, documentManagementModal}) => {
 
+    console.log(documents)
+    console.log(typeof(documents))
+
     return (
         <div className="flex-1 flex flex-col px-5 mx-10 w-full">
             <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -33,6 +36,11 @@ export const DocumentTable = ({documents, documentManagementModal}) => {
                                         scope="col"
                                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                     >
+                                        Uploaded By
+                                    </th><th
+                                        scope="col"
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    >
                                         Uploaded Date
                                     </th>
                                 </tr>
@@ -42,6 +50,7 @@ export const DocumentTable = ({documents, documentManagementModal}) => {
                                     <tr key={documentIdx} className="bg-white hover:bg-gray-100 cursor-pointer" onClick={() => {console.log(documentIdx); documentManagementModal(documentIdx)}}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{document.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{distributedBadge(document.distributed)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{document.owner}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{document.uploaded}</td>
                                     </tr>
                                 ))}

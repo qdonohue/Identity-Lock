@@ -1,10 +1,7 @@
-import { useState } from "react";
-
 import { UserRemoveIcon, CloudDownloadIcon, DocumentRemoveIcon } from "@heroicons/react/outline";
 import { CustomModal } from "../Components/CustomModal";
 
 const SharedWithList = ({ people }) => {
-
     return (
         <ul role="list" className="divide-y divide-gray-200 h-72 overflow-y-auto col-span-2">
             {people.map((person) => (
@@ -31,8 +28,7 @@ const SharedWithList = ({ people }) => {
 }
 
 
-
-export const DocumentManagementModal = ({ document, closeModal }) => {
+export const DocumentManagementModal = ({ document, viewDocument, closeModal }) => {
 
     return (
         <CustomModal open={true} display={closeModal}>
@@ -60,6 +56,18 @@ export const DocumentManagementModal = ({ document, closeModal }) => {
                         <div className="py-4 sm:py-5 sm:grid grid-cols-3 sm:gap-4 sm:px-6">
                             <dt className="text-sm font-medium text-gray-500">Shared with {document.sharedWith.length} </dt>
                             <SharedWithList people={document.sharedWith} className="col-span-2" />
+                        </div>
+                        <div className="flex justify-center items-center align-center">
+                            <button
+                                onClick={() => {viewDocument(document)}}
+                                type="button"
+                                className="inline-flex place-self-auto px-20 py-3 m-6 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                                <CloudDownloadIcon className="flex-shrink-0 h-5 w-5 text-white-400 mr-3" />
+                                <div>
+                                    View Document
+                                </div>
+                            </button>
                         </div>
                         <div className="flex justify-center items-center align-center">
                             <button

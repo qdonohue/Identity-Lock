@@ -13,10 +13,6 @@ export const Home = () => {
     const history = useHistory()
 
     const { registered, apiGet } = useNetwork();
-    const [token, setToken] = useState(null)
-    async function network() {
-        console.log(await apiGet('/ping'))
-    }
 
     if (isAuthenticated && !registered) {
         history.push('/signup')

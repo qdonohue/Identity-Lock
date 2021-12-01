@@ -9,7 +9,7 @@ import { CustomModal } from "../Components/CustomModal"
 import { UploadFile } from "../Components/UploadFile"
 
 
-export const DocumentUploadModal = ({ closeModal }) => {
+export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
     const [documentName, setDocumentName] = useState(null)
     const [sharedList, setSharedList] = useState(null)
     const [document, setDocument] = useState(null)
@@ -19,22 +19,21 @@ export const DocumentUploadModal = ({ closeModal }) => {
         console.log(documentName)
         console.log(sharedList)
         console.log(document)
-        closeModal()
+        const data = {name: documentName, uploaded: "11/30/20", distributed: false, sharedWith: sharedList, owner: "Quinn D.", data:document}
+        uploadDocument(data)
     }
 
     useEffect(() => {
         const ready = !!(documentName && sharedList && document)
-        console.log("Check updated, submit state: " + ready)
-        console.log(documentName)
-        console.log(sharedList)
         console.log(document)
         setReadyForSubmit(ready)
     }, [documentName, sharedList, document])
 
     const loadOptions = async (val) => {
         return [
-            { value: "Quinn Donohue", label: "Quinn Donohue" },
-            { value: "Amory Donohue", label: "Amory Donohue" },
+            { value: 'Calvin Hawkins', label: 'Calvin Hawkins'},
+            { value: "Kristen Ramos", label: "Kristen Ramos" },
+            { value: "Ted Fox", label: "Ted Fox" },
             { value: "Will Donohue", label: "Will Donohue" },
             { value: "Scott Donohue", label: "Scott Donohue" },
         ]
