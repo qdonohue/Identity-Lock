@@ -5,7 +5,6 @@ import (
 	"Identity-Lock/go-backend/db"
 	"Identity-Lock/go-backend/ml"
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -44,8 +43,6 @@ func main() {
 
 	metadata := face.MetaDataContract{Name: &person_group_label}
 
-	fmt.Println("Person group ID: " + person_group_label)
-
 	resp, err := personGroupClient.Create(cnt, person_group_label, metadata)
 	if err != nil {
 		log.Fatal(err)
@@ -55,7 +52,7 @@ func main() {
 		log.Fatal("Error creating person group")
 	}
 
-	//defer personGroupClient.Delete(cnt, person_group_label)
+	// defer personGroupClient.Delete(cnt, person_group_label)
 
 	personGroupPersonClient := face.NewPersonGroupPersonClient(face_endpoint)
 	personGroupPersonClient.Authorizer = autorest.NewCognitiveServicesAuthorizer(face_key)

@@ -6,15 +6,13 @@ import useNetwork from './Network/useNetwork'
 import { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 
+import logo from './FullLogo.jpg'
+
 export const Home = () => {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
     const history = useHistory()
 
     const { registered, apiGet } = useNetwork();
-    const [token, setToken] = useState(null)
-    async function network() {
-        console.log(await apiGet('/ping'))
-    }
 
     if (isAuthenticated && !registered) {
         history.push('/signup')
@@ -22,14 +20,11 @@ export const Home = () => {
 
     return (
         <>
-            <p> Super basic test going on here</p>
-            <LoginButton />
-            {isAuthenticated && <div>Hello {user.name} with token {token && token}</div>}
-            <Link to="/document/12345">
-                <div>Click here to see document 12345!</div>
-            </Link>
-            {<><div>networkResponse</div> <button onClick={() => network()}>API request</button></>}
-            <LogoutButton />
+            <img
+                className="lg:block w-auto m-auto"
+                src={logo}
+                alt="Identity Lock"
+            />
         </>
     )
 }
