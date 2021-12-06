@@ -60,3 +60,7 @@ func (api *Api) UserExists(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(body)
 }
+
+func (api *Api) GetContacts(w http.ResponseWriter, r *http.Request) {
+
+}
