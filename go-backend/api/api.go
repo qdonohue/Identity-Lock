@@ -5,9 +5,10 @@ import (
 )
 
 type Api struct {
-	ml *ml.Ml
+	ml      *ml.Ml
+	tempDir string
 }
 
-func NewApi(ml *ml.Ml) *Api {
-	return &Api{ml: ml}
+func NewApi(ml *ml.Ml, tempDir string) *Api {
+	return &Api{ml: ml, tempDir: tempDir}
 }

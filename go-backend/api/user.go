@@ -13,10 +13,6 @@ import (
 )
 
 func (api *Api) RegisterUser(w http.ResponseWriter, r *http.Request) {
-	// User name
-	// Email address
-	// Sub (already have)
-	// Photo?
 	r.ParseMultipartForm(32 << 20)
 
 	sub := r.Context().Value(app_constants.ContextSubKey).(string)
@@ -58,7 +54,7 @@ func (api *Api) UserExists(w http.ResponseWriter, r *http.Request) {
 	data := map[string]bool{"Registered": registered}
 	body, err := json.Marshal(data)
 	if err != nil {
-		log.Println("Error marshelling suer exists data")
+		log.Println("Error marshelling user exists data")
 	}
 	w.WriteHeader(http.StatusOK)
 

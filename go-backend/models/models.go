@@ -11,7 +11,7 @@ type User struct {
 	Sub        string `gorm:"primaryKey"`
 	Name       string
 	Documents  []Document  `gorm:"foreignKey:ID"`
-	Contacts   []User      `gorm:"foreignKey:Email"`
+	Contacts   []User      `gorm:"foreignKey:Sub"`
 	Violations []Violation `gorm:"foreignKey:ID"`
 	FaceKey    uuid.UUID
 }
@@ -19,14 +19,14 @@ type User struct {
 type Document struct {
 	gorm.Model
 	Title    string
-	Owner    User   `gorm:"foreignKey:Email"`
-	Approved []User `gorm:"foreignKey:Email"`
+	Owner    User   `gorm:"foreignKey:Sub"`
+	Approved []User `gorm:"foreignKey:Sub"`
 }
 
 type Violation struct {
 	gorm.Model
 	Document Document `gorm:"foreignKey:ID"`
-	Violator User     `gorm:"foreignKey:Email"`
+	Violator User     `gorm:"foreignKey:Sub"`
 }
 
 func MakeMigrations(db *gorm.DB) error {
