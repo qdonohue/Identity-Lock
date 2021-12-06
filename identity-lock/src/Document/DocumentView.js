@@ -62,8 +62,8 @@ export const DocumentView = ({ document, closeView }) => {
             data.append('image', blob)
 
             const resp = await multipartFormPost('/api/detect', data)
-            setAccessGranted(resp.data.Permitted)
             setReply(resp.data)
+            setAccessGranted(resp.data.Permitted)
         },
         [webcamRef]
     );

@@ -34,25 +34,6 @@ func NewMl(client *face.Client, groupName string, personGroupClient *face.Person
 
 // https://github.com/Azure-Samples/cognitive-services-quickstart-code/blob/e6202977ef87e1115bd79395d436ae22198586a9/go/Face/FaceQuickstart.go#L425
 func (ml *Ml) RegisterUserFace(io io.ReadCloser, sub string) uuid.UUID {
-
-	// DEBUG: CHECK IF PERSON GROUP EXISTS
-	maxCount := int32(10)
-	includeModel := true
-	lp, err := ml.personGroupClient.List(*ml.context, "", &maxCount, &includeModel)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	arr := *lp.Value
-
-	if len(arr) < 1 {
-		log.Println("No person groups found")
-	}
-
-	for _, group := range arr {
-		log.Println("Group id: ", group.PersonGroupID)
-	}
-
 	user := face.NameAndUserDataContract{Name: &sub}
 
 	log.Println("Person group name: ")
