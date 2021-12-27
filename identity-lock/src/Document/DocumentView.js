@@ -39,18 +39,14 @@ const PDFHeader = ({ document, back, pageCount }) => {
 }
 
 
-const testData = {Permitted: false, FaceCount: 3, Confidence: .72}
-
-
 export const DocumentView = ({ document, closeView }) => {
-    // const {documentName} = useParams();
+    const webcamRef = useRef(null);
+    const { multipartFormPost } = useNetwork()
     const { user } = useAuth0()
     const [numPages, setNumPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(1);
     const [accessGranted, setAccessGranted] = useState(true)
 
-    const webcamRef = useRef(null);
-    const { multipartFormPost } = useNetwork()
     const [reply, setReply] = useState(null)
 
     const capture = useCallback(
