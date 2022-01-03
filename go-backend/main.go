@@ -43,7 +43,7 @@ func main() {
 	personGroupClient.Delete(cnt, person_group_label)
 
 	// SIMILARLY TERRIBLE HACK FOR LOCAL TESTING DOCUMENT UPLOAD
-	dir, err := ioutil.TempDir("", "documents")
+	dir, err := ioutil.TempDir(".", "documents")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,8 +60,6 @@ func main() {
 	if resp.StatusCode != 200 {
 		log.Fatal("Error creating person group")
 	}
-
-	// defer personGroupClient.Delete(cnt, person_group_label)
 
 	personGroupPersonClient := face.NewPersonGroupPersonClient(face_endpoint)
 	personGroupPersonClient.Authorizer = autorest.NewCognitiveServicesAuthorizer(face_key)

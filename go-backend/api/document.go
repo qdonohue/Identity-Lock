@@ -5,6 +5,8 @@ import (
 	"Identity-Lock/go-backend/db"
 	"Identity-Lock/go-backend/models"
 	"encoding/json"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -23,6 +25,7 @@ func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	authorizedUsers := r.Form.Get("contacts")
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
+	// Unpacking authorized users, finding in DB
 	var contacts []string
 	err = json.Unmarshal([]byte(authorizedUsers), &contacts)
 	if err != nil {
@@ -32,18 +35,43 @@ func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	var approved []models.User
 	db.DB.Find(&approved, contacts)
 
-	document := models.Document{Title: fileTitle, Owner: user, Approved: approved}
+	// Uploading file (LOCALLY FOR NOW)
+	log.Println("File title name: " + fileTitle)
+	log.Println("Api name: " + api.tempDir)
+	f, err := ioutil.TempFile(api.tempDir, fileTitle)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	_, err = io.Copy(f, file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	localTitle := f.Name()
+	log.Println("Final file name: " + localTitle)
+
+	document := models.Document{Title: fileTitle, DocumentOwner: user.ID, Approved: approved, LocalTitle: localTitle}
 
 	result := db.DB.Create(&document)
 
-	if result.Error != nil {
-		log.Fatal(result.Error)
-		http.Error(w, "Document upload error", http.StatusBadRequest)
+	type UploadResponse struct {
+		Success bool
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
 
-	w.Write([]byte("Document created successfully"))
+	if result.Error != nil {
+		log.Println(result.Error)
+		body, _ := json.Marshal(UploadResponse{Success: false})
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(body)
+	} else {
+		body, _ := json.Marshal(UploadResponse{Success: true})
+		w.WriteHeader(http.StatusCreated)
+		w.Write(body)
+	}
 }
 
 func (api *Api) GetDocuments(w http.ResponseWriter, r *http.Request) {

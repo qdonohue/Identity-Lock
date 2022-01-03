@@ -9,3 +9,7 @@ https://docs.microsoft.com/en-us/azure/cognitive-services/face/quickstarts/clien
 
 https://pkg.go.dev/github.com/Azure/azure-sdk-for-go/services/cognitiveservices/v1.0/face#Client.DetectWithStream
 
+
+
+# TODO:
+Uncomment out contact logic --> implement it

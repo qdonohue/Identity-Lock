@@ -7,26 +7,27 @@ import (
 
 type User struct {
 	gorm.Model
-	Email      string `gorm:"index;unique"`
-	Sub        string `gorm:"primaryKey"`
+	Email      string
+	Sub        string
 	Name       string
-	Documents  []Document  `gorm:"foreignKey:ID"`
-	Contacts   []User      `gorm:"foreignKey:Sub"`
-	Violations []Violation `gorm:"foreignKey:ID"`
+	Documents  []Document  `gorm:"foreignKey:DocumentOwner"`
+	Contacts   []User      `gorm:"foreignKey:ID"`
+	Violations []Violation `gorm:"foreignKey:Violator"`
 	FaceKey    uuid.UUID
 }
 
 type Document struct {
 	gorm.Model
-	Title    string
-	Owner    User   `gorm:"foreignKey:Sub"`
-	Approved []User `gorm:"foreignKey:Sub"`
+	Title         string
+	LocalTitle    string
+	DocumentOwner uint   `gorm:"foreignKey:Sub"`
+	Approved      []User `gorm:"foreignKey:Sub"`
 }
 
 type Violation struct {
 	gorm.Model
 	Document Document `gorm:"foreignKey:ID"`
-	Violator User     `gorm:"foreignKey:Sub"`
+	Violator uint
 }
 
 func MakeMigrations(db *gorm.DB) error {

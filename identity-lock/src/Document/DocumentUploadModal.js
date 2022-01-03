@@ -54,8 +54,10 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
         data.append('contacts', sharedList)
         setReplyLoading(true)
         const resp = await multipartFormPost('/api/upload', data)
-        setReply(resp.data.success)
+        console.log(resp)
         setReplyLoading(false)
+        const suc = resp?.data?.Success
+        setReply(suc ? suc : false)
     }
 
     const reset = () => {
