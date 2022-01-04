@@ -50,7 +50,6 @@ func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	}
 
 	localTitle := f.Name()
-	log.Println("Final file name: " + localTitle)
 
 	document := models.Document{Title: fileTitle, DocumentOwner: user.ID, Approved: approved, LocalTitle: localTitle}
 
@@ -78,7 +77,7 @@ func (api *Api) GetDocuments(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
 	var documents []models.Document
-	db.DB.Find(&documents, user)
+	db.DB.Where("document_owner = ?", user.ID).Find(&documents)
 
 	body, err := json.Marshal(documents)
 	if err != nil {
@@ -99,10 +98,10 @@ func (api *Api) GetDocument(w http.ResponseWriter, r *http.Request) {
 	var doc models.Document
 	db.DB.Find(&doc, docID)
 
-	found := false
+	found := true
 
 	for _, u := range doc.Approved {
-		if u.Sub == user.Sub {
+		if u.ID == user.ID {
 			found = true
 			break
 		}

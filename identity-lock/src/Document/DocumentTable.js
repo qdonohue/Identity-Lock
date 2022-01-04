@@ -9,9 +9,6 @@ const distributedBadge = (sent) => {
 
 export const DocumentTable = ({documents, documentManagementModal}) => {
 
-    console.log(documents)
-    console.log(typeof(documents))
-
     return (
         <div className="flex-1 flex flex-col px-5 mx-10 w-full">
             <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">

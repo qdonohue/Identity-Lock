@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
+import useNetwork from "../Network/useNetwork"
 import { DocumentTable } from "./DocumentTable"
 import { DocumentTableHeader } from "./DocumentTableHeader"
 import { DocumentManagementModal } from "./DocumentManagementModal"
 import { DocumentUploadModal } from "./DocumentUploadModal"
-import {DocumentView} from "./DocumentView"
+import { DocumentView } from "./DocumentView"
 
 const people = [
     {
@@ -28,7 +29,7 @@ const people = [
 ]
 
 const testDocuments = [
-    { name: "Test document 1", uploaded: "11/02/21", distributed: true, sharedWith: people, owner: "Ted Fox", data: null},
+    { name: "Test document 1", uploaded: "11/02/21", distributed: true, sharedWith: people, owner: "Ted Fox", data: null },
     { name: "Test document 2", uploaded: "12/15/20", distributed: false, sharedWith: people, owner: "Amory D.", data: null },
     { name: "Test document 3", uploaded: "01/04/20", distributed: true, sharedWith: people, owner: "Scott D.", data: null },
     { name: "Test document 4", uploaded: "04/32/20", distributed: false, sharedWith: people, owner: "Kristen Ramos", data: null },
@@ -40,13 +41,24 @@ const testDocuments = [
 ]
 
 export const Documents = () => {
+    const { apiGet } = useNetwork();
     const [documents, setDocuments] = useState(testDocuments)
-    const [documentManagementModal, setDocumentManagementModal] = useState({active: false, id: null})
+    const [documentManagementModal, setDocumentManagementModal] = useState({ active: false, id: null })
     const [documentUploadModal, setDocumentUploadModal] = useState(null)
     const [viewDocument, setViewDocument] = useState(null)
 
+    // useEffect(async () => {
+    //     const resp = await apiGet("/api/getdocuments")
+    //     console.log(resp)
+    // }, [documentManagementModal, documentUploadModal])
+
+    const fetchDocs = async () => {
+        const resp = await apiGet("/api/getdocuments")
+        console.log(resp)
+    }
+
     const openManagementModal = (id) => {
-        setDocumentManagementModal({active: true, id})
+        setDocumentManagementModal({ active: true, id })
     }
 
     const addDocument = (data) => {
@@ -55,19 +67,19 @@ export const Documents = () => {
         setDocuments(documents)
         setDocumentUploadModal(null)
     }
-
     if (viewDocument) {
         return (
-            <DocumentView document={viewDocument} closeView={() => {setViewDocument(null)}} />
+            <DocumentView document={viewDocument} closeView={() => { setViewDocument(null) }} />
         )
     }
 
     return (
         <div className="flex flex-col align-center items-center justify-start max-h-screen">
-            {documentUploadModal && <DocumentUploadModal closeModal={() => setDocumentUploadModal(null)} uploadDocument={addDocument}/>}
-            {documentManagementModal.active && <DocumentManagementModal document={documents[documentManagementModal.id]} viewDocument={setViewDocument} closeModal={() => setDocumentManagementModal({active: false, id: null})}/>}
-            <DocumentTableHeader count={documents.length} openNewDocumentModal={setDocumentUploadModal}/>
+            {documentUploadModal && <DocumentUploadModal closeModal={() => setDocumentUploadModal(null)} uploadDocument={addDocument} />}
+            {documentManagementModal.active && <DocumentManagementModal document={documents[documentManagementModal.id]} viewDocument={setViewDocument} closeModal={() => setDocumentManagementModal({ active: false, id: null })} />}
+            <DocumentTableHeader count={documents.length} openNewDocumentModal={setDocumentUploadModal} />
             <DocumentTable documents={documents} documentManagementModal={openManagementModal} />
+            <button onClick={fetchDocs}>Get new documents</button>
         </div>
     )
 }

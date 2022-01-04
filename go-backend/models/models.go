@@ -19,9 +19,9 @@ type User struct {
 type Document struct {
 	gorm.Model
 	Title         string
-	LocalTitle    string
-	DocumentOwner uint   `gorm:"foreignKey:Sub"`
-	Approved      []User `gorm:"foreignKey:Sub"`
+	LocalTitle    string `json:"-"`
+	DocumentOwner uint
+	Approved      []User `gorm:"foreignKey:ID"`
 }
 
 type Violation struct {
