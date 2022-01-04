@@ -151,7 +151,6 @@ func (api *Api) GetDocument(w http.ResponseWriter, r *http.Request) {
 	var doc models.Document
 	db.DB.Find(&doc, docID)
 
-	// TODO: Ensure security
 	found := doc.DocumentOwner == user.ID
 
 	for _, u := range doc.Approved {
