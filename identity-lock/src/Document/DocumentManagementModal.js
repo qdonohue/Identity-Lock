@@ -1,5 +1,6 @@
 import { UserRemoveIcon, CloudDownloadIcon, DocumentRemoveIcon } from "@heroicons/react/outline";
 import { CustomModal } from "../Components/CustomModal";
+import useNetwork from "../Network/useNetwork";
 
 const SharedWithList = ({ people }) => {
     if (!people) {
@@ -34,6 +35,12 @@ const SharedWithList = ({ people }) => {
 
 
 export const DocumentManagementModal = ({ document, viewDocument, closeModal }) => {
+    const { apiGet } = useNetwork()
+
+    const deleteDocument = async () => {
+        await apiGet('/api/deletedocument', {id: document.id})
+        closeModal()
+    }
 
     return (
         <CustomModal open={true} display={closeModal}>
@@ -42,7 +49,7 @@ export const DocumentManagementModal = ({ document, viewDocument, closeModal }) 
                     <h3 className="text-lg leading-6 font-medium text-gray-900">Document Information</h3>
                     <button
                         type="button"
-                        onClick={console.log('delete')}
+                        onClick={deleteDocument}
                         className="bg-white-800 p-1 mr-5 my-auto rounded-full hover:bg-blue-200"
                     >
                         <DocumentRemoveIcon className="h-10 w-10 text-red-500" aria-hidden="true" />

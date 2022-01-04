@@ -10,7 +10,7 @@ type User struct {
 	Email      string
 	Sub        string
 	Name       string
-	Documents  []Document  `gorm:"foreignKey:DocumentOwner"`
+	Documents  []Document  `gorm:"foreignKey:DocumentOwner;constraint:OnDelete:SET NULL;"`
 	Contacts   []User      `gorm:"foreignKey:ID"`
 	Violations []Violation `gorm:"foreignKey:Violator"`
 	FaceKey    uuid.UUID

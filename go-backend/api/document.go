@@ -69,6 +69,34 @@ func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (api *Api) DeleteDocument(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
+
+	docID := r.URL.Query()["id"][0]
+
+	var doc models.Document
+	result := db.DB.Find(&doc, docID)
+
+	type DeleteResponse struct {
+		Success bool
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if result.RowsAffected == 0 || user.ID == doc.DocumentOwner {
+		// Incredibly stupid, but funky behavior on foreign key delete (parent gets deleted?!) means SQL is easiest
+		db.DB.Exec("DELETE FROM Documents where id = ?", docID)
+		w.WriteHeader(http.StatusAccepted)
+		body, _ := json.Marshal(DeleteResponse{Success: true})
+		w.Write(body)
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		body, _ := json.Marshal(DeleteResponse{Success: false})
+		w.Write(body)
+	}
+
+}
+
 type DocumentListDocument struct {
 	Title        string `json:"name"`
 	ID           uint   `json:"id"`
@@ -125,7 +153,6 @@ func (api *Api) GetDocument(w http.ResponseWriter, r *http.Request) {
 	var doc models.Document
 	db.DB.Find(&doc, docID)
 
-	// TODO: Ensure security
 	found := doc.DocumentOwner == user.ID
 
 	for _, u := range doc.Approved {

@@ -34,12 +34,7 @@ export const Documents = () => {
     const [documents, setDocuments] = useState([])
     const [documentManagementModal, setDocumentManagementModal] = useState({ active: false, id: null })
     const [documentUploadModal, setDocumentUploadModal] = useState(null)
-
-    const fetchDocs = async () => {
-        const docList = await apiGet("/api/getdocuments")
-        setDocuments(docList ? docList : [])
-    }
-
+    
     useEffect(async () => {
         const docList = await apiGet("/api/getdocuments")
         setDocuments(docList ? docList : [])
@@ -66,7 +61,6 @@ export const Documents = () => {
             {documentManagementModal.active && <DocumentManagementModal document={documents[documentManagementModal.id]} viewDocument={viewDoc} closeModal={() => setDocumentManagementModal({ active: false, id: null })} />}
             <DocumentTableHeader count={documents.length} openNewDocumentModal={setDocumentUploadModal} />
             <DocumentTable documents={documents} documentManagementModal={openManagementModal} />
-            <button onClick={fetchDocs}>Get new documents</button>
         </div>
     )
 }
