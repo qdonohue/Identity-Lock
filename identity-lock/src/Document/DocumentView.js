@@ -41,7 +41,7 @@ const PDFHeader = ({ title, back, pageCount }) => {
 
 export const DocumentView = () => {
     const webcamRef = useRef(null);
-    const { multipartFormPost, apiGet } = useNetwork()
+    const { multipartFormPost, fileGet } = useNetwork()
     const { user } = useAuth0()
     const { id, title } = useParams()
     const history = useHistory();
@@ -67,9 +67,6 @@ export const DocumentView = () => {
         [webcamRef]
     );
 
-    console.log(id + '|' + title)
-
-
     useEffect(() => {
         const interval = setInterval(() => {
             capture()
@@ -78,7 +75,7 @@ export const DocumentView = () => {
     }, [])
 
     useEffect(async () => {
-        const reply = await apiGet('/api/getdocument', {document_id: id})
+        const reply = await fileGet('/api/getdocument', {id: id})
         setPdf(reply)
     }, [document])
 

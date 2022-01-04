@@ -21,7 +21,8 @@ type Document struct {
 	Title         string
 	LocalTitle    string `json:"-"`
 	DocumentOwner uint
-	Approved      []User `gorm:"foreignKey:ID"`
+	// Approved does NOT include document owner
+	Approved []User `gorm:"foreignKey:ID"`
 }
 
 type Violation struct {

@@ -10,8 +10,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
@@ -36,10 +34,7 @@ func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	var approved []models.User
 	db.DB.Find(&approved, contacts)
 
-	// Uploading file (LOCALLY FOR NOW)
-	log.Println("File title name: " + fileTitle)
-	log.Println("Api name: " + api.tempDir)
-	f, err := ioutil.TempFile(api.tempDir, fileTitle)
+	f, err := ioutil.TempFile(api.tempDir, "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -125,12 +120,13 @@ func (api *Api) GetDocuments(w http.ResponseWriter, r *http.Request) {
 func (api *Api) GetDocument(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
-	docID := mux.Vars(r)["document_id"]
+	docID := r.URL.Query()["id"][0]
 
 	var doc models.Document
 	db.DB.Find(&doc, docID)
 
-	found := true
+	// TODO: Ensure security
+	found := doc.DocumentOwner == user.ID
 
 	for _, u := range doc.Approved {
 		if u.ID == user.ID {
@@ -145,5 +141,5 @@ func (api *Api) GetDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.ServeFile(w, r, api.tempDir+doc.Title)
+	http.ServeFile(w, r, doc.LocalTitle)
 }
