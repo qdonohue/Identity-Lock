@@ -13,6 +13,8 @@
 - Share document with a person
 - See document appear as the non-owner of the document
 - Validate permissions for viewing document
+## TODO:
+- How to manage contacts being visible to others? Being open to everyone on site prob a no go (especially not contact photo... but maybe for someone who is added? That requires an element of opt-in on contact add invite)
 
 ## Alerts / Violations
 - More nuanced violations (create violation IFF unverified-person violation)
