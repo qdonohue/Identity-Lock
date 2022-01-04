@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useHistory } from "react-router-dom"
 
 import useNetwork from "../Network/useNetwork"
+import { ContactManagementModal } from "./ContactManagementModal"
 import { ContactTable } from "./ContactTable"
 
 import { ContactTableHeader } from "./ContactTableHeader"
@@ -24,7 +25,7 @@ export const Contacts = () => {
     const { apiGet } = useNetwork()
     // const [contacts, setContacts] = useState([])
     const [contacts, setContacts] = useState(demoContacts)
-    const [contactDetailsModal, setContactDetailsModal] = useState()
+    const [contactDetailsModal, setContactDetailsModal] = useState(null)
 
     // useEffect(async () => {
     //     const contactList = await apiGet("/api/getcontacts")
@@ -37,6 +38,7 @@ export const Contacts = () => {
 
     return (
         <div className="flex flex-col align-center items-center justify-start max-h-screen">
+            {(contactDetailsModal==0 || contactDetailsModal) && <ContactManagementModal contact={contacts[contactDetailsModal]} closeModal={() => setContactDetailsModal(null)}/>}
             <ContactTableHeader count={contacts.length} />
             <ContactTable contacts={contacts} contactDetailsModal={openDetailModal} />
         </div>
