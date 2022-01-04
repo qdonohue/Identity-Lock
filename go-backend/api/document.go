@@ -84,6 +84,8 @@ func (api *Api) DeleteDocument(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if result.RowsAffected == 0 || user.ID == doc.DocumentOwner {
+		// Incredibly stupid, but funky behavior on foreign key delete (parent gets deleted?!) means SQL is easiest
+		db.DB.Exec("DELETE FROM Documents where id = ?", docID)
 		w.WriteHeader(http.StatusAccepted)
 		body, _ := json.Marshal(DeleteResponse{Success: true})
 		w.Write(body)

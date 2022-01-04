@@ -86,7 +86,7 @@ export const NetworkProvider = ({ children }) => {
         }
     }
 
-    async function apiGet(endpoint) {
+    async function apiGet(endpoint, params = null) {
         setLoading(true)
 
         const token = await getToken()
@@ -98,6 +98,7 @@ export const NetworkProvider = ({ children }) => {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
+                params: params
             });
             setLoading(false)
             return response.data
