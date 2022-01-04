@@ -13,4 +13,5 @@ func (a *Api) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/api/upload", a.UploadDocument)
 	r.HandleFunc("/api/getdocuments", a.GetDocuments).Methods("GET")
 	r.HandleFunc("/api/getdocument", a.GetDocument).Methods("GET")
+	r.HandleFunc("/api/deletedocument", a.DeleteDocument).Methods("GET")
 }
