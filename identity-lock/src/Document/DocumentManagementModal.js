@@ -74,18 +74,6 @@ export const DocumentManagementModal = ({ document, viewDocument, closeModal }) 
                                 </div>
                             </button>
                         </div>
-                        <div className="flex justify-center items-center align-center">
-                            <button
-                                onClick={console.log("hi")}
-                                type="button"
-                                className="inline-flex place-self-auto px-20 py-3 m-6 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                            >
-                                <CloudDownloadIcon className="flex-shrink-0 h-5 w-5 text-white-400 mr-3" />
-                                <div>
-                                    Download
-                                </div>
-                            </button>
-                        </div>
                     </dl>
                 </div>
             </div>
