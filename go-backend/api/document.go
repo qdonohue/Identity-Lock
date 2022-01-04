@@ -5,6 +5,7 @@ import (
 	"Identity-Lock/go-backend/db"
 	"Identity-Lock/go-backend/models"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -73,13 +74,44 @@ func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type DocumentListDocument struct {
+	Title        string `json:"name"`
+	ID           uint   `json:"id"`
+	UploadedDate string `json:"uploaded"`
+	Author       string `json:"author"`
+	Sent         bool   `json:"distributed"`
+}
+
+// Document name, sent, uploaded by (author), uploaded date
+func processDocumentArrayForList(dList []models.Document, author string) []DocumentListDocument {
+	var final []DocumentListDocument
+
+	for _, d := range dList {
+		var cur DocumentListDocument
+
+		cur.Title = d.Title
+		cur.ID = d.ID
+
+		date := d.CreatedAt
+		cur.UploadedDate = fmt.Sprintf("%d/%d/%d", date.Month(), date.Day(), date.Year())
+
+		cur.Author = author
+
+		cur.Sent = (len(d.Approved) > 0)
+
+		final = append(final, cur)
+	}
+
+	return final
+}
+
 func (api *Api) GetDocuments(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
 	var documents []models.Document
 	db.DB.Where("document_owner = ?", user.ID).Find(&documents)
 
-	body, err := json.Marshal(documents)
+	body, err := json.Marshal(processDocumentArrayForList(documents, user.Name))
 	if err != nil {
 		log.Println("Error getting documents data")
 	}

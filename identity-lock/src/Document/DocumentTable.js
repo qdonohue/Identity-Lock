@@ -44,10 +44,10 @@ export const DocumentTable = ({documents, documentManagementModal}) => {
                             </thead>
                             <tbody className="divide-y">
                                 {documents.map((document, documentIdx) => (
-                                    <tr key={documentIdx} className="bg-white hover:bg-gray-100 cursor-pointer" onClick={() => {console.log(documentIdx); documentManagementModal(documentIdx)}}>
+                                    <tr key={documentIdx} className="bg-white hover:bg-gray-100 cursor-pointer" onClick={() => {documentManagementModal(documentIdx)}}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{document.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{distributedBadge(document.distributed)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{document.owner}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{document.author}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{document.uploaded}</td>
                                     </tr>
                                 ))}

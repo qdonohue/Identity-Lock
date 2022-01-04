@@ -28,21 +28,9 @@ const people = [
     }
 ]
 
-const testDocuments = [
-    { name: "Test document 1", uploaded: "11/02/21", distributed: true, sharedWith: people, owner: "Ted Fox", data: null },
-    { name: "Test document 2", uploaded: "12/15/20", distributed: false, sharedWith: people, owner: "Amory D.", data: null },
-    { name: "Test document 3", uploaded: "01/04/20", distributed: true, sharedWith: people, owner: "Scott D.", data: null },
-    { name: "Test document 4", uploaded: "04/32/20", distributed: false, sharedWith: people, owner: "Kristen Ramos", data: null },
-    { name: "Test document 1", uploaded: "12/02/20", distributed: true, sharedWith: people, owner: "Will D.", data: null },
-    { name: "Test document 2", uploaded: "01/03/20", distributed: false, sharedWith: people, owner: "Scott D.", data: null },
-    { name: "Test document 3", uploaded: "07/04/20", distributed: true, sharedWith: people, owner: "Quinn D.", data: null },
-    { name: "Test document 4", uploaded: "09/05/21", distributed: false, sharedWith: people, owner: "Amory D.", data: null },
-    { name: "Test document 1", uploaded: "01/02/21", distributed: true, sharedWith: people, owner: "Quinn D.", data: null },
-]
-
 export const Documents = () => {
     const { apiGet } = useNetwork();
-    const [documents, setDocuments] = useState(testDocuments)
+    const [documents, setDocuments] = useState(null)
     const [documentManagementModal, setDocumentManagementModal] = useState({ active: false, id: null })
     const [documentUploadModal, setDocumentUploadModal] = useState(null)
     const [viewDocument, setViewDocument] = useState(null)
@@ -53,8 +41,8 @@ export const Documents = () => {
     // }, [documentManagementModal, documentUploadModal])
 
     const fetchDocs = async () => {
-        const resp = await apiGet("/api/getdocuments")
-        console.log(resp)
+        const docList = await apiGet("/api/getdocuments")
+        setDocuments(docList)
     }
 
     const openManagementModal = (id) => {

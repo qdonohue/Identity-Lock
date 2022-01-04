@@ -86,7 +86,6 @@ export const NetworkProvider = ({ children }) => {
     }
 
     async function apiGet(endpoint) {
-        console.log("Making get network request")
         setLoading(true)
 
         const token = await getToken()
@@ -99,9 +98,6 @@ export const NetworkProvider = ({ children }) => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            console.log("Registration not needed")
-            console.log(response)
-            console.log(response.data)
             return response.data
 
         } catch (e) {

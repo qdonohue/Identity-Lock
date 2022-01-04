@@ -2,6 +2,11 @@ import { UserRemoveIcon, CloudDownloadIcon, DocumentRemoveIcon } from "@heroicon
 import { CustomModal } from "../Components/CustomModal";
 
 const SharedWithList = ({ people }) => {
+    if (!people) {
+        return (
+            <div className="col-span-3"> You haven't shared this document with anyone yet.</div>
+        )
+    }
     return (
         <ul role="list" className="divide-y divide-gray-200 h-72 overflow-y-auto col-span-2">
             {people.map((person) => (
@@ -54,12 +59,12 @@ export const DocumentManagementModal = ({ document, viewDocument, closeModal }) 
                             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{document.uploaded}</dd>
                         </div>
                         <div className="py-4 sm:py-5 sm:grid grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Shared with {document.sharedWith.length} </dt>
+                            <dt className="text-sm font-medium text-gray-500">Shared with {document?.sharedWith?.length ? document.sharedWith.length : 0 } </dt>
                             <SharedWithList people={document.sharedWith} className="col-span-2" />
                         </div>
                         <div className="flex justify-center items-center align-center">
                             <button
-                                onClick={() => {viewDocument(document)}}
+                                onClick={() => {viewDocument(document.id)}}
                                 type="button"
                                 className="inline-flex place-self-auto px-20 py-3 m-6 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
