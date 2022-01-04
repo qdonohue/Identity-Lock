@@ -3,11 +3,11 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 import Webcam from "react-webcam";
 import { Document, Page } from 'react-pdf/dist/esm/entry.webpack';
+import { useParams, useHistory } from "react-router-dom";
 
 
 import { ChevronRightIcon, ChevronLeftIcon, XCircleIcon, CheckIcon, XIcon } from "@heroicons/react/solid";
-
-
+import Loader from "react-loader-spinner";
 
 import useNetwork from "../Network/useNetwork";
 
@@ -17,13 +17,13 @@ const videoConstraints = {
     facingMode: "user"
 };
 
-const PDFHeader = ({ document, back, pageCount }) => {
+const PDFHeader = ({ title, back, pageCount }) => {
     return (
         <div className="flex flex-col mx-10 mt-2 w-full">
             <div className="overflow-hidden rounded-lg bg-blue-800 flex flex-row justify-between h-20">
                 <div className="bg-white p-1 ml-5 my-auto rounded-full"> <CheckIcon className="text-green-800 h-10 w-10" /> </div>
                 <div className="flex flex-col place-items-center">
-                    <div className="text-white text-2xl my-auto font-bold">{`Viewing ${document.name}`}</div>
+                    <div className="text-white text-2xl my-auto font-bold">{`Viewing ${title}`}</div>
                     <div className="text-white my-auto text-xl">{pageCount}</div>
                 </div>
                 <div />
@@ -39,13 +39,16 @@ const PDFHeader = ({ document, back, pageCount }) => {
 }
 
 
-export const DocumentView = ({ document, closeView }) => {
+export const DocumentView = () => {
     const webcamRef = useRef(null);
-    const { multipartFormPost } = useNetwork()
+    const { multipartFormPost, apiGet } = useNetwork()
     const { user } = useAuth0()
+    const { id, title } = useParams()
+    const history = useHistory();
     const [numPages, setNumPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(1);
     const [accessGranted, setAccessGranted] = useState(true)
+    const [pdf, setPdf] = useState(null)
 
     const [reply, setReply] = useState(null)
 
@@ -64,6 +67,8 @@ export const DocumentView = ({ document, closeView }) => {
         [webcamRef]
     );
 
+    console.log(id + '|' + title)
+
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -71,6 +76,11 @@ export const DocumentView = ({ document, closeView }) => {
         }, 5000)
         return () => clearInterval(interval)
     }, [])
+
+    useEffect(async () => {
+        const reply = await apiGet('/api/getdocument', {document_id: id})
+        setPdf(reply)
+    }, [document])
 
     function onDocumentLoadSuccess({ numPages }) {
         setNumPages(numPages);
@@ -85,14 +95,17 @@ export const DocumentView = ({ document, closeView }) => {
                     {(pageNumber > 1) ? <div className="m-auto" onClick={() => { setPageNumber(pageNumber - 1) }} ><ChevronLeftIcon className="w-20 h-20" /> </div> : <div className="m-auto"> </div>}
 
                     <div className="flex flex-col place-items-center">
-                        <PDFHeader document={document} back={closeView} pageCount={`(page ${pageNumber} of ${numPages})`} />
-                        <Document
+                        <PDFHeader title={decodeURI(title)} back={() => {history.push('/documents')}} pageCount={`(page ${pageNumber} of ${numPages})`} />
+                        {pdf ? <Document
                             className="border-2 border-grey"
-                            file={document.data}
+                            file={pdf}
                             onLoadSuccess={onDocumentLoadSuccess}
                         >
                             <Page pageNumber={pageNumber} />
-                        </Document>
+                        </Document> 
+                        : 
+                        <div className="flex items-center justify-center m-20" ><Loader type="Circles" color="#1565c0" height={120} width={120} /></div>
+                        }
                     </div>
 
                     {(pageNumber < numPages) ?
@@ -112,12 +125,12 @@ export const DocumentView = ({ document, closeView }) => {
                     </div>
                     <div className="text-red text-l text-center">The document owner has been notified</div>
                     <button
-                type="button"
-                onClick={capture}
-                className="inline-flex items-center mt-20 w-30 px-2.5 py-1.5 border border-transparent text-s font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-                I promise I'll be good
-            </button>
+                        type="button"
+                        onClick={capture}
+                        className="inline-flex items-center mt-20 w-30 px-2.5 py-1.5 border border-transparent text-s font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        I promise I'll be good
+                    </button>
                 </div>}
 
             <div className="absolute top-12 right-0">
