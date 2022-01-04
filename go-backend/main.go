@@ -5,6 +5,7 @@ import (
 	"Identity-Lock/go-backend/db"
 	"Identity-Lock/go-backend/ml"
 	"context"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -41,6 +42,14 @@ func main() {
 	// TERRIBLE HACK FOR LOCAL TESTING:
 	personGroupClient.Delete(cnt, person_group_label)
 
+	// SIMILARLY TERRIBLE HACK FOR LOCAL TESTING DOCUMENT UPLOAD
+	dir, err := ioutil.TempDir(".", "documents")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer os.RemoveAll(dir)
+
 	metadata := face.MetaDataContract{Name: &person_group_label}
 
 	resp, err := personGroupClient.Create(cnt, person_group_label, metadata)
@@ -52,14 +61,12 @@ func main() {
 		log.Fatal("Error creating person group")
 	}
 
-	// defer personGroupClient.Delete(cnt, person_group_label)
-
 	personGroupPersonClient := face.NewPersonGroupPersonClient(face_endpoint)
 	personGroupPersonClient.Authorizer = autorest.NewCognitiveServicesAuthorizer(face_key)
 
 	ml := ml.NewMl(&client, person_group_label, &personGroupClient, &personGroupPersonClient, &cnt)
 
-	app := app.NewApp(ml)
+	app := app.NewApp(ml, dir)
 
 	log.Print("Starting server on port 8080")
 

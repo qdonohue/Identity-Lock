@@ -8,7 +8,7 @@ import React, {
 
 import { useAuth0 } from "@auth0/auth0-react"
 import axios from 'axios'
-import {useHistory } from "react-router"
+import { useHistory } from "react-router"
 
 const NetworkContext = createContext()
 
@@ -75,6 +75,7 @@ export const NetworkProvider = ({ children }) => {
                 },
             }
             )
+            setLoading(false)
             return response
         } catch (e) {
             if (e.response && e?.response?.status == 400) {
@@ -86,7 +87,6 @@ export const NetworkProvider = ({ children }) => {
     }
 
     async function apiGet(endpoint) {
-        console.log("Making get network request")
         setLoading(true)
 
         const token = await getToken()
@@ -99,9 +99,7 @@ export const NetworkProvider = ({ children }) => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            console.log("Registration not needed")
-            console.log(response)
-            console.log(response.data)
+            setLoading(false)
             return response.data
 
         } catch (e) {
@@ -111,6 +109,32 @@ export const NetworkProvider = ({ children }) => {
             setLoading(false)
             console.error(e);
         }
+    }
+
+    async function fileGet(endpoint, params) {
+        setLoading(true)
+
+        const token = await getToken()
+
+        try {
+            const response = await axios.get(process.env.REACT_APP_BACKEND_URL + endpoint, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                responseType: 'blob',
+                params: params
+            });
+            setLoading(false)
+            return response.data
+
+        } catch (e) {
+            if (e.response && e?.response?.status == 400) {
+                registrationNeeded(e.response)
+            }
+            setLoading(false)
+            console.error(e);
+        }
+
     }
 
     async function getToken() {
@@ -138,6 +162,7 @@ export const NetworkProvider = ({ children }) => {
             apiPost,
             multipartFormPost,
             apiGet,
+            fileGet,
             getToken,
             registered,
             setRegistered,

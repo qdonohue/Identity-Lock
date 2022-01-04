@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
+import useNetwork from "../Network/useNetwork"
 import { DocumentTable } from "./DocumentTable"
 import { DocumentTableHeader } from "./DocumentTableHeader"
 import { DocumentManagementModal } from "./DocumentManagementModal"
 import { DocumentUploadModal } from "./DocumentUploadModal"
-import {DocumentView} from "./DocumentView"
+import { useHistory } from "react-router-dom"
 
 const people = [
     {
@@ -27,26 +28,25 @@ const people = [
     }
 ]
 
-const testDocuments = [
-    { name: "Test document 1", uploaded: "11/02/21", distributed: true, sharedWith: people, owner: "Ted Fox", data: null},
-    { name: "Test document 2", uploaded: "12/15/20", distributed: false, sharedWith: people, owner: "Amory D.", data: null },
-    { name: "Test document 3", uploaded: "01/04/20", distributed: true, sharedWith: people, owner: "Scott D.", data: null },
-    { name: "Test document 4", uploaded: "04/32/20", distributed: false, sharedWith: people, owner: "Kristen Ramos", data: null },
-    { name: "Test document 1", uploaded: "12/02/20", distributed: true, sharedWith: people, owner: "Will D.", data: null },
-    { name: "Test document 2", uploaded: "01/03/20", distributed: false, sharedWith: people, owner: "Scott D.", data: null },
-    { name: "Test document 3", uploaded: "07/04/20", distributed: true, sharedWith: people, owner: "Quinn D.", data: null },
-    { name: "Test document 4", uploaded: "09/05/21", distributed: false, sharedWith: people, owner: "Amory D.", data: null },
-    { name: "Test document 1", uploaded: "01/02/21", distributed: true, sharedWith: people, owner: "Quinn D.", data: null },
-]
-
 export const Documents = () => {
-    const [documents, setDocuments] = useState(testDocuments)
-    const [documentManagementModal, setDocumentManagementModal] = useState({active: false, id: null})
+    const { apiGet } = useNetwork();
+    const history = useHistory();
+    const [documents, setDocuments] = useState([])
+    const [documentManagementModal, setDocumentManagementModal] = useState({ active: false, id: null })
     const [documentUploadModal, setDocumentUploadModal] = useState(null)
-    const [viewDocument, setViewDocument] = useState(null)
+
+    const fetchDocs = async () => {
+        const docList = await apiGet("/api/getdocuments")
+        setDocuments(docList ? docList : [])
+    }
+
+    useEffect(async () => {
+        const docList = await apiGet("/api/getdocuments")
+        setDocuments(docList ? docList : [])
+    }, [documentManagementModal, documentUploadModal])
 
     const openManagementModal = (id) => {
-        setDocumentManagementModal({active: true, id})
+        setDocumentManagementModal({ active: true, id })
     }
 
     const addDocument = (data) => {
@@ -56,18 +56,17 @@ export const Documents = () => {
         setDocumentUploadModal(null)
     }
 
-    if (viewDocument) {
-        return (
-            <DocumentView document={viewDocument} closeView={() => {setViewDocument(null)}} />
-        )
+    const viewDoc = (document) => {
+        history.push('/viewdocument/' + document.id + '/' + encodeURI(document.name))
     }
 
     return (
         <div className="flex flex-col align-center items-center justify-start max-h-screen">
-            {documentUploadModal && <DocumentUploadModal closeModal={() => setDocumentUploadModal(null)} uploadDocument={addDocument}/>}
-            {documentManagementModal.active && <DocumentManagementModal document={documents[documentManagementModal.id]} viewDocument={setViewDocument} closeModal={() => setDocumentManagementModal({active: false, id: null})}/>}
-            <DocumentTableHeader count={documents.length} openNewDocumentModal={setDocumentUploadModal}/>
+            {documentUploadModal && <DocumentUploadModal closeModal={() => setDocumentUploadModal(null)} uploadDocument={addDocument} />}
+            {documentManagementModal.active && <DocumentManagementModal document={documents[documentManagementModal.id]} viewDocument={viewDoc} closeModal={() => setDocumentManagementModal({ active: false, id: null })} />}
+            <DocumentTableHeader count={documents.length} openNewDocumentModal={setDocumentUploadModal} />
             <DocumentTable documents={documents} documentManagementModal={openManagementModal} />
+            <button onClick={fetchDocs}>Get new documents</button>
         </div>
     )
 }

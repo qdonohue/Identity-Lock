@@ -1,37 +1,75 @@
 import { useEffect, useState } from "react"
-
-
 import AsyncSelect from 'react-select/async';
 
-import { DocumentAddIcon } from "@heroicons/react/outline"
+import { DocumentAddIcon, CheckCircleIcon, EmojiSadIcon } from "@heroicons/react/outline"
+import Loader from "react-loader-spinner";
 import { ContactSelect } from "../Components/ContactSelect"
 import { CustomModal } from "../Components/CustomModal"
 import { UploadFile } from "../Components/UploadFile"
+import useNetwork from "../Network/useNetwork";
+
+const ReplyHandler = ({ reply, reset, close }) => {
+    return (
+        <div className="m-20">
+            {reply ?
+                <div className="flex flex-col place-items-center">
+                    <CheckCircleIcon className="text-green-800 h-40 w-40" />
+                    <p>Document uploaded succesfully!</p>
+                    <button className="inline-flex items-center px-6 py-3 m-6 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" onClick={close}>
+                        Continue
+                    </button>
+                </div> :
+                <div className="flex flex-col place-items-center">
+                    <EmojiSadIcon className="text-red-800 h-40 w-40" />
+                    <p>Something went wrong.</p>
+                    <button className="inline-flex items-center px-6 py-3 m-6 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" onClick={reset}>
+                        Start again
+                    </button>
+                </div>}
+        </div>
+    )
+}
 
 
 export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
+    const { multipartFormPost } = useNetwork()
     const [documentName, setDocumentName] = useState(null)
     const [sharedList, setSharedList] = useState(null)
     const [document, setDocument] = useState(null)
     const [readyForSubmit, setReadyForSubmit] = useState(false)
-
-    const submit = () => {
-        console.log(documentName)
-        console.log(sharedList)
-        console.log(document)
-        const data = {name: documentName, uploaded: "11/30/20", distributed: false, sharedWith: sharedList, owner: "Quinn D.", data:document}
-        uploadDocument(data)
-    }
+    const [replyLoading, setReplyLoading] = useState(false)
+    // const [reply, setReply] = useState(false)
+    const [reply, setReply] = useState(false)
 
     useEffect(() => {
-        const ready = !!(documentName && sharedList && document)
+        const ready = !!(documentName && document)
         console.log(document)
         setReadyForSubmit(ready)
-    }, [documentName, sharedList, document])
+    }, [documentName, document])
+
+    const submit = async () => {
+        const data = new FormData()
+        data.append('document', document)
+        data.append('title', documentName)
+        data.append('contacts', sharedList)
+        setReplyLoading(true)
+        const resp = await multipartFormPost('/api/upload', data)
+        console.log(resp)
+        setReplyLoading(false)
+        const suc = resp?.data?.Success
+        setReply(suc ? suc : false)
+    }
+
+    const reset = () => {
+        setDocumentName(null)
+        setSharedList(null)
+        setDocument(null)
+        setReply(false)
+    }
 
     const loadOptions = async (val) => {
         return [
-            { value: 'Calvin Hawkins', label: 'Calvin Hawkins'},
+            { value: 'Calvin Hawkins', label: 'Calvin Hawkins' },
             { value: "Kristen Ramos", label: "Kristen Ramos" },
             { value: "Ted Fox", label: "Ted Fox" },
             { value: "Will Donohue", label: "Will Donohue" },
@@ -47,7 +85,7 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
                     <h3 className="text-lg leading-6 font-medium text-gray-900">Document Information</h3>
                 </div>
                 <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
-                    <dl className="sm:divide-y sm:divide-gray-200">
+                    {replyLoading ? <div className="flex items-center justify-center m-20" ><Loader type="Circles" color="#1565c0" height={120} width={120} /></div> : reply ? <ReplyHandler reply={reply} reset={reset} close={closeModal} /> : <dl className="sm:divide-y sm:divide-gray-200">
                         <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt className="text-sm font-medium text-gray-500">Name</dt>
                             <div className="mt-1 sm:mt-0 sm:col-span-2">
@@ -86,7 +124,7 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
                             </div>
                             {!readyForSubmit && <div className="text-red-600 text-xs mb-5">Complete all fields to submit</div>}
                         </div>
-                    </dl>
+                    </dl>}
                 </div>
             </div>
         </CustomModal>

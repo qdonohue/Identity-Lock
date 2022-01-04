@@ -59,7 +59,7 @@ function App() {
               <Route path="/test">
                 <FaceVerificationDemo />
               </Route>
-              <Route path="/viewdocument/:documentID">
+              <Route path="/viewdocument/:id/:title">
                 <DocumentView />
               </Route>
             </Switch>

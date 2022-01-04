@@ -22,9 +22,9 @@ func pong(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("pong"))
 }
 
-func NewApp(ml *ml.Ml) *App {
+func NewApp(ml *ml.Ml, tempDir string) *App {
 
-	api := api.NewApi(ml)
+	api := api.NewApi(ml, tempDir)
 
 	r := mux.NewRouter()
 	api.RegisterRoutes(r)
