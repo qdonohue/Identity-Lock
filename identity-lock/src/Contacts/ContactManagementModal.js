@@ -4,18 +4,21 @@ import useNetwork from "../Network/useNetwork"
 import { UserAddIcon } from "@heroicons/react/solid"
 import { CustomModal } from "../Components/CustomModal";
 import { UserRemoveIcon } from "@heroicons/react/outline";
+import { useState } from "react";
 
 
 export const ContactManagementModal = ({ contact, closeModal }) => {
-    const { multipartFormPost } = useNetwork()
+    const { apiGet } = useNetwork()
 
-    console.log(contact)
-
-    // TODO: Trigger re-render
-    const contactManage = async () => {
-        const data = new FormData()
-        data.append('id', contact.id)
-        await multipartFormPost((contact.status ? '/api/deletecontact' : '/api/addcontact'), data)
+    // TODO: Sort out re-render trigger
+    const contactAction = async () => {
+        let response
+        if (contact.currentContact) {
+            console.log(contact)
+            response = apiGet('/api/removecontact', {id: contact.id})
+        } else {
+            response =  apiGet('/api/addcontact', {id: contact.id})
+        }
     }
 
     return (
@@ -32,18 +35,18 @@ export const ContactManagementModal = ({ contact, closeModal }) => {
                         </div>
                         <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt className="text-sm font-medium text-gray-500">Status</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{contact.status ? "Current Contact" : "Unadded"}</dd>
+                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{contact.currentContact ? "Current Contact" : "Unadded"}</dd>
                         </div>
                         <div className="flex justify-center items-center align-center">
                             <button
-                                onClick={contactManage}
+                                onClick={contactAction}
                                 type="button"
                                 className="inline-flex place-self-auto px-20 py-3 m-6 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
-                                {contact.status ?
+                                {contact.currentContact ?
                                     <><UserRemoveIcon className="flex-shrink-0 h-5 w-5 text-white-400 mr-3" />
                                         <div>
-                                            Add Contact
+                                            Remove Contact
                                         </div></>
                                     :
                                     <><UserAddIcon className="flex-shrink-0 h-5 w-5 text-white-400 mr-3" />

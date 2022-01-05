@@ -11,7 +11,7 @@ type User struct {
 	Sub        string
 	Name       string
 	Documents  []Document  `gorm:"foreignKey:DocumentOwner;constraint:OnDelete:SET NULL;"`
-	Contacts   []User      `gorm:"foreignKey:ID"`
+	Contacts   []*User     `gorm:"many2many:contacts"`
 	Violations []Violation `gorm:"foreignKey:Violator"`
 	FaceKey    uuid.UUID
 }

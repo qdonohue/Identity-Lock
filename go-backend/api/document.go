@@ -12,6 +12,10 @@ import (
 	"net/http"
 )
 
+type DocumentResponse struct {
+	Success bool
+}
+
 func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20) // limit your max input length!
 	file, _, err := r.FormFile("document")
@@ -51,19 +55,15 @@ func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 
 	result := db.DB.Create(&document)
 
-	type UploadResponse struct {
-		Success bool
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 
 	if result.Error != nil {
 		log.Println(result.Error)
-		body, _ := json.Marshal(UploadResponse{Success: false})
+		body, _ := json.Marshal(DocumentResponse{Success: false})
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(body)
 	} else {
-		body, _ := json.Marshal(UploadResponse{Success: true})
+		body, _ := json.Marshal(DocumentResponse{Success: true})
 		w.WriteHeader(http.StatusCreated)
 		w.Write(body)
 	}
@@ -77,21 +77,17 @@ func (api *Api) DeleteDocument(w http.ResponseWriter, r *http.Request) {
 	var doc models.Document
 	result := db.DB.Find(&doc, docID)
 
-	type DeleteResponse struct {
-		Success bool
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 
 	if result.RowsAffected == 0 || user.ID == doc.DocumentOwner {
 		// Incredibly stupid, but funky behavior on foreign key delete (parent gets deleted?!) means SQL is easiest
 		db.DB.Exec("DELETE FROM Documents where id = ?", docID)
 		w.WriteHeader(http.StatusAccepted)
-		body, _ := json.Marshal(DeleteResponse{Success: true})
+		body, _ := json.Marshal(DocumentResponse{Success: true})
 		w.Write(body)
 	} else {
 		w.WriteHeader(http.StatusUnauthorized)
-		body, _ := json.Marshal(DeleteResponse{Success: false})
+		body, _ := json.Marshal(DocumentResponse{Success: false})
 		w.Write(body)
 	}
 

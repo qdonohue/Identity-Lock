@@ -9,55 +9,58 @@ import (
 	"net/http"
 )
 
-func (api *Api) AddContact(w http.ResponseWriter, r *http.Request) {
-	r.ParseMultipartForm(32 << 20)
+type ContactResponse struct {
+	Success bool
+}
 
+// TODO: Error seems to be in using contactID (string) as part of search?
+// Works in sqlite3 though when plugged in....
+func (api *Api) AddContact(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
-	contactID := r.Form.Get("id")
+	contactID := r.URL.Query()["id"][0]
 
 	var newContact models.User
-	tx := db.DB.Where("id = ?", contactID).First(&newContact)
-	if tx.Error != nil {
-		log.Fatal(tx.Error)
-	}
+	db.DB.Where("id = ?", contactID).Find(&newContact)
 
 	err := db.DB.Model(&user).Association("Contacts").Append(&newContact)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Error in creating association")
+		log.Println(err)
 	}
+
+	body, _ := json.Marshal(ContactResponse{Success: true})
 
 	w.WriteHeader(http.StatusCreated)
 
-	w.Write([]byte("Contact added successfully"))
+	w.Write(body)
 }
 
 func (api *Api) RemoveContact(w http.ResponseWriter, r *http.Request) {
-	r.ParseMultipartForm(32 << 20)
-
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
-	contactID := r.Form.Get("id")
+	contactID := r.URL.Query()["id"][0]
 
 	var removeContact models.User
-	db.DB.Where("id = ?", contactID).First(&removeContact)
+	db.DB.Where("id = ?", contactID).Find(&removeContact)
 
 	err := db.DB.Model(&user).Association("Contacts").Delete(&removeContact)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Error removing contact", http.StatusBadRequest)
+		log.Println(err)
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	body, _ := json.Marshal(ContactResponse{Success: true})
 
-	w.Write([]byte("Contact removed successfully"))
+	w.WriteHeader(http.StatusOK)
+
+	w.Write(body)
 }
 
 type ContactListContact struct {
 	Id              uint   `json:"id"`
 	Name            string `json:"name"`
 	Email           string `json:"email"`
-	CurrrentContact bool   `json:"status"`
+	CurrrentContact bool   `json:"currentContact"`
 }
 
 func currentContact(associations []uint, id uint) bool {
@@ -114,11 +117,14 @@ func (api *Api) SearchAllContacts(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
-func processUserContactsForList(cList []models.User) []ContactListContact {
+func processUserContactsForList(cList []models.User, userID uint) []ContactListContact {
 	var final []ContactListContact
 
 	for _, c := range cList {
-		cur := ContactListContact{Name: c.Name, Email: c.Email, CurrrentContact: true}
+		if c.ID == userID {
+			continue
+		}
+		cur := ContactListContact{Name: c.Name, Email: c.Email, CurrrentContact: true, Id: c.ID}
 		final = append(final, cur)
 	}
 
@@ -131,7 +137,7 @@ func (api *Api) GetUserContacts(w http.ResponseWriter, r *http.Request) {
 	var contacts []models.User
 	db.DB.Model(&user).Association("Contacts").Find(&contacts)
 
-	body, err := json.Marshal(processUserContactsForList(contacts))
+	body, err := json.Marshal(processUserContactsForList(contacts, user.ID))
 	if err != nil {
 		log.Println("Error in contact JSON")
 	}

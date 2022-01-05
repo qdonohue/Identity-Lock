@@ -15,6 +15,16 @@
 - Validate permissions for viewing document
 ## TODO:
 - How to manage contacts being visible to others? Being open to everyone on site prob a no go (especially not contact photo... but maybe for someone who is added? That requires an element of opt-in on contact add invite)
+- Search options --> search by email or name
+- Indicator that you're only looking at current contacts
+- Standarize badge into modal too?
+- Loading indicator
+
+## Contact Selection
+- Feed contacts into search-async component
+- Add to document based on selection (How do those results get passed?)
+    - Possible you can grab onchange - but would need to store record of diff and not just auto-send
+    - Or could have an explicit "add" button --> need to trigger re-render btw...
 
 ## Alerts / Violations
 - More nuanced violations (create violation IFF unverified-person violation)
