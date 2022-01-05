@@ -13,8 +13,6 @@ type ContactResponse struct {
 	Success bool
 }
 
-// TODO: Error seems to be in using contactID (string) as part of search?
-// Works in sqlite3 though when plugged in....
 func (api *Api) AddContact(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
@@ -89,6 +87,9 @@ func processContactArrayForList(cList []models.User, u models.User) []ContactLis
 	}
 
 	for _, c := range cList {
+		if c.ID == u.ID {
+			continue
+		}
 
 		cur := ContactListContact{Id: c.ID, Name: c.Name, Email: c.Email, CurrrentContact: currentContact(extractedIDs, c.ID)}
 
@@ -143,5 +144,20 @@ func (api *Api) GetUserContacts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Write(body)
+}
+
+func (api *Api) GetContact(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
+
+	contactID := r.URL.Query()["id"][0]
+
+	var contact []models.User
+	db.DB.Where("id = ?", contactID).Find(&contact)
+
+	body, _ := json.Marshal(processContactArrayForList(contact, user))
+
+	w.WriteHeader(http.StatusCreated)
+
 	w.Write(body)
 }

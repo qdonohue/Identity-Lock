@@ -30,7 +30,7 @@ export const Contacts = () => {
 
     return (
         <div className="flex flex-col align-center items-center justify-start max-h-screen">
-            {(contactDetailsModal == 0 || contactDetailsModal) && <ContactManagementModal contact={contacts[contactDetailsModal]} closeModal={() => setContactDetailsModal(null)}/>}
+            {(contactDetailsModal == 0 || contactDetailsModal) && <ContactManagementModal id={contactDetailsModal} closeModal={() => setContactDetailsModal(null)}/>}
             <ContactTableHeader count={contacts.length} search={setSearchString}/>
             <ContactTable contacts={contacts} contactDetailsModal={openDetailModal} />
         </div>

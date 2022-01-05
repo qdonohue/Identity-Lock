@@ -1,5 +1,3 @@
-
-
 import { SearchIcon } from '@heroicons/react/solid'
 
 export const ContactTableHeader = ({ count, search }) => {

@@ -41,7 +41,7 @@ export const ContactTable = ({ contacts, contactDetailsModal }) => {
                             </thead>
                             <tbody className="divide-y">
                                 {contacts.map((contact, documentIdx) => (
-                                    <tr key={documentIdx} className="bg-white hover:bg-gray-100 cursor-pointer" onClick={() => { contactDetailsModal(documentIdx) }}>
+                                    <tr key={documentIdx} className="bg-white hover:bg-gray-100 cursor-pointer" onClick={() => { contactDetailsModal(contact.id) }}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{contact.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contact.email}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contactBadge(contact.currentContact)}</td>
