@@ -3,10 +3,20 @@ import useNetwork from "../Network/useNetwork"
 
 import { UserAddIcon } from "@heroicons/react/solid"
 import { CustomModal } from "../Components/CustomModal";
+import { UserRemoveIcon } from "@heroicons/react/outline";
 
 
 export const ContactManagementModal = ({ contact, closeModal }) => {
-    const { apiPost } = useNetwork()
+    const { multipartFormPost } = useNetwork()
+
+    console.log(contact)
+
+    // TODO: Trigger re-render
+    const contactManage = async () => {
+        const data = new FormData()
+        data.append('id', contact.id)
+        await multipartFormPost((contact.status ? '/api/deletecontact' : '/api/addcontact'), data)
+    }
 
     return (
         <CustomModal open={true} display={closeModal}>
@@ -26,14 +36,20 @@ export const ContactManagementModal = ({ contact, closeModal }) => {
                         </div>
                         <div className="flex justify-center items-center align-center">
                             <button
-                                onClick={() => { console.log('clicked')}}
+                                onClick={contactManage}
                                 type="button"
                                 className="inline-flex place-self-auto px-20 py-3 m-6 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
-                                <UserAddIcon className="flex-shrink-0 h-5 w-5 text-white-400 mr-3" />
-                                <div>
-                                    Add Contact
-                                </div>
+                                {contact.status ?
+                                    <><UserRemoveIcon className="flex-shrink-0 h-5 w-5 text-white-400 mr-3" />
+                                        <div>
+                                            Add Contact
+                                        </div></>
+                                    :
+                                    <><UserAddIcon className="flex-shrink-0 h-5 w-5 text-white-400 mr-3" />
+                                        <div>
+                                            Add Contact
+                                        </div></>}
                             </button>
                         </div>
                     </dl>

@@ -2,7 +2,12 @@
 
 import { SearchIcon } from '@heroicons/react/solid'
 
-export const ContactTableHeader = ({ count }) => {
+export const ContactTableHeader = ({ count, search }) => {
+
+    const searchContacts = (val) => {
+        console.log(val.target.value)
+        search(val.target.value)
+    }
 
     return (
         <div className="flex flex-col px-5 mx-10 w-full mt-2">
@@ -17,6 +22,7 @@ export const ContactTableHeader = ({ count }) => {
                         id="search"
                         className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-2xl border-gray-300 rounded-md"
                         placeholder="Search all contacts"
+                        onChange={searchContacts}
                     />
                 </div>
             </div>

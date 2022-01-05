@@ -4,6 +4,7 @@ import (
 	"Identity-Lock/go-backend/app_constants"
 	"Identity-Lock/go-backend/db"
 	"Identity-Lock/go-backend/models"
+	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -16,12 +17,14 @@ func (api *Api) AddContact(w http.ResponseWriter, r *http.Request) {
 	contactID := r.Form.Get("id")
 
 	var newContact models.User
-	db.DB.Where("id = ?", contactID).First(&newContact)
+	tx := db.DB.Where("id = ?", contactID).First(&newContact)
+	if tx.Error != nil {
+		log.Fatal(tx.Error)
+	}
 
-	result := db.DB.Model(&curUser).Association("Contacts").Append(&newContact)
-	if result.Error != nil {
-		log.Println(result.Error)
-		http.Error(w, "Error adding contact", http.StatusBadRequest)
+	err := db.DB.Model(&user).Association("Contacts").Append(&newContact)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -39,9 +42,9 @@ func (api *Api) RemoveContact(w http.ResponseWriter, r *http.Request) {
 	var removeContact models.User
 	db.DB.Where("id = ?", contactID).First(&removeContact)
 
-	result := db.DB.Model(&curUser).Association("Contacts").Delete(&removeContact)
-	if result.Error != nil {
-		log.Println(result.Error)
+	err := db.DB.Model(&user).Association("Contacts").Delete(&removeContact)
+	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, "Error removing contact", http.StatusBadRequest)
 	}
 
@@ -50,41 +53,89 @@ func (api *Api) RemoveContact(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Contact removed successfully"))
 }
 
+type ContactListContact struct {
+	Id              uint   `json:"id"`
+	Name            string `json:"name"`
+	Email           string `json:"email"`
+	CurrrentContact bool   `json:"status"`
+}
+
+func currentContact(associations []uint, id uint) bool {
+
+	for _, i := range associations {
+		if i == id {
+			return true
+		}
+	}
+
+	return false
+}
+
 // Document name, sent, uploaded by (author), uploaded date
-// func processDocumentArrayForList(dList []models.Document, author string) []DocumentListDocument {
-// 	var final []DocumentListDocument
+func processContactArrayForList(cList []models.User, u models.User) []ContactListContact {
+	var final []ContactListContact
 
-// 	for _, d := range dList {
-// 		var cur DocumentListDocument
+	var currentAssociations []models.User
 
-// 		cur.Title = d.Title
-// 		cur.ID = d.ID
+	db.DB.Model(&u).Association("Contacts").Find(&currentAssociations)
 
-// 		date := d.CreatedAt
-// 		cur.UploadedDate = fmt.Sprintf("%d/%d/%d", date.Month(), date.Day(), date.Year())
+	var extractedIDs []uint
 
-// 		cur.Author = author
+	for _, cur := range currentAssociations {
+		extractedIDs = append(extractedIDs, cur.ID)
+	}
 
-// 		cur.Sent = (len(d.Approved) > 0)
+	for _, c := range cList {
 
-// 		final = append(final, cur)
-// 	}
+		cur := ContactListContact{Id: c.ID, Name: c.Name, Email: c.Email, CurrrentContact: currentContact(extractedIDs, c.ID)}
 
-// 	return final
-// }
+		final = append(final, cur)
+	}
 
-// func (api *Api) SearchContacts(w http.ResponseWriter, r *http.Request) {
-// 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
+	return final
+}
 
-// 	var contacts []models.User
-// 	db.
+// TODO: Add in email search functionality
+func (api *Api) SearchAllContacts(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
-// 	body, err := json.Marshal(processDocumentArrayForList(documents, user.Name))
-// 	if err != nil {
-// 		log.Println("Error getting documents data")
-// 	}
+	searchString := r.URL.Query()["searchString"][0] + "%"
 
-// 	w.WriteHeader(http.StatusOK)
+	var searchResults []models.User
+	db.DB.Where("name like ?", searchString).Find(&searchResults)
 
-// 	w.Write(body)
-// }
+	body, err := json.Marshal(processContactArrayForList(searchResults, user))
+	if err != nil {
+		log.Println("Error getting contacts data")
+	}
+
+	w.WriteHeader(http.StatusOK)
+
+	w.Write(body)
+}
+
+func processUserContactsForList(cList []models.User) []ContactListContact {
+	var final []ContactListContact
+
+	for _, c := range cList {
+		cur := ContactListContact{Name: c.Name, Email: c.Email, CurrrentContact: true}
+		final = append(final, cur)
+	}
+
+	return final
+}
+
+func (api *Api) GetUserContacts(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
+
+	var contacts []models.User
+	db.DB.Model(&user).Association("Contacts").Find(&contacts)
+
+	body, err := json.Marshal(processUserContactsForList(contacts))
+	if err != nil {
+		log.Println("Error in contact JSON")
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(body)
+}

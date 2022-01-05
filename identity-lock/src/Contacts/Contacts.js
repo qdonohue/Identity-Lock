@@ -23,14 +23,25 @@ const demoContacts = [
 
 export const Contacts = () => {
     const { apiGet } = useNetwork()
-    // const [contacts, setContacts] = useState([])
-    const [contacts, setContacts] = useState(demoContacts)
+    const [contacts, setContacts] = useState([])
+    const [searchString, setSearchString] = useState(null)
+    // const [contacts, setContacts] = useState(demoContacts)
     const [contactDetailsModal, setContactDetailsModal] = useState(null)
 
     // useEffect(async () => {
     //     const contactList = await apiGet("/api/getcontacts")
     //     setContacts(contactList ? contactList : [])
     // })
+
+    useEffect(async () => {
+        let contactList;
+        if (searchString) {
+            contactList = await apiGet('/api/searchallcontacts', {searchString})
+        } else {
+            contactList = await apiGet('/api/getcontacts')
+        }
+        setContacts(contactList ? contactList : [])
+    }, [searchString])
 
     const openDetailModal = (id) => {
         setContactDetailsModal(id)
@@ -39,7 +50,7 @@ export const Contacts = () => {
     return (
         <div className="flex flex-col align-center items-center justify-start max-h-screen">
             {(contactDetailsModal==0 || contactDetailsModal) && <ContactManagementModal contact={contacts[contactDetailsModal]} closeModal={() => setContactDetailsModal(null)}/>}
-            <ContactTableHeader count={contacts.length} />
+            <ContactTableHeader count={contacts.length} search={setSearchString}/>
             <ContactTable contacts={contacts} contactDetailsModal={openDetailModal} />
         </div>
     )
