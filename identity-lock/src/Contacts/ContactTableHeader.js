@@ -3,7 +3,6 @@ import { SearchIcon } from '@heroicons/react/solid'
 export const ContactTableHeader = ({ count, search }) => {
 
     const searchContacts = (val) => {
-        console.log(val.target.value)
         search(val.target.value)
     }
 

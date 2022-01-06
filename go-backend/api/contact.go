@@ -152,12 +152,28 @@ func (api *Api) GetContact(w http.ResponseWriter, r *http.Request) {
 
 	contactID := r.URL.Query()["id"][0]
 
-	var contact []models.User
+	var contact models.User
 	db.DB.Where("id = ?", contactID).Find(&contact)
 
-	body, _ := json.Marshal(processContactArrayForList(contact, user))
+	// Check for if existing contact
+	var currentAssociations []models.User
 
-	w.WriteHeader(http.StatusCreated)
+	db.DB.Model(&user).Association("Contacts").Find(&currentAssociations)
+
+	currentContact := false
+
+	for _, p := range currentAssociations {
+		if p.ID == contact.ID {
+			currentContact = true
+			break
+		}
+	}
+
+	processed := ContactListContact{Name: contact.Name, Id: contact.ID, Email: contact.Email, CurrrentContact: currentContact}
+
+	body, _ := json.Marshal(processed)
+
+	w.WriteHeader(http.StatusOK)
 
 	w.Write(body)
 }

@@ -36,8 +36,6 @@ export const NetworkProvider = ({ children }) => {
         setLoading(true)
         const token = await getToken()
 
-        console.log(token)
-
         try {
             const response = await axios.post(process.env.REACT_APP_BACKEND_URL + endpoint, payload, {
                 headers: {
@@ -91,9 +89,6 @@ export const NetworkProvider = ({ children }) => {
         setLoading(true)
 
         const token = await getToken()
-
-        console.log(token)
-
         try {
             const response = await axios.get(process.env.REACT_APP_BACKEND_URL + endpoint, {
                 headers: {
@@ -151,7 +146,6 @@ export const NetworkProvider = ({ children }) => {
                 audience: 'identity-lock',
             })
         }
-        console.log(token)
         setLoading(false)
         return token;
     }
