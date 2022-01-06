@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import AsyncSelect from 'react-select/async';
+import Select from 'react-select'
 
 import { DocumentAddIcon, CheckCircleIcon, EmojiSadIcon } from "@heroicons/react/outline"
 import Loader from "react-loader-spinner";
@@ -32,14 +33,24 @@ const ReplyHandler = ({ reply, reset, close }) => {
 
 
 export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
-    const { multipartFormPost } = useNetwork()
+    const { multipartFormPost, apiGet } = useNetwork()
     const [documentName, setDocumentName] = useState(null)
+    const [contacts, setContacts] = useState([])
     const [sharedList, setSharedList] = useState(null)
     const [document, setDocument] = useState(null)
     const [readyForSubmit, setReadyForSubmit] = useState(false)
     const [replyLoading, setReplyLoading] = useState(false)
-    // const [reply, setReply] = useState(false)
     const [reply, setReply] = useState(false)
+
+    useEffect(async () => {
+        const resp = await apiGet('/api/getcontacts')
+        const options = []
+        for (const contact of resp) {
+            options.push({label: contact.name, value: contact.id})
+        }
+        console.log(options)
+        setContacts(options)
+    }, [])
 
     useEffect(() => {
         const ready = !!(documentName && document)
@@ -67,16 +78,6 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
         setReply(false)
     }
 
-    const loadOptions = async (val) => {
-        return [
-            { value: 'Calvin Hawkins', label: 'Calvin Hawkins' },
-            { value: "Kristen Ramos", label: "Kristen Ramos" },
-            { value: "Ted Fox", label: "Ted Fox" },
-            { value: "Will Donohue", label: "Will Donohue" },
-            { value: "Scott Donohue", label: "Scott Donohue" },
-        ]
-    }
-
 
     return (
         <CustomModal open={true} display={closeModal}>
@@ -99,13 +100,7 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
                             </div>
                         </div>
                         <div className="py-4 sm:py-5 sm:grid grid-cols-3 sm:gap-4 sm:px-6">
-                            <AsyncSelect className="w-96"
-                                isMulti
-                                cacheOptions
-                                defaultOptions
-                                loadOptions={loadOptions}
-                                onChange={(val) => setSharedList(val)}
-                            />
+                            <Select isMulti={true} onChange={(val) => setSharedList(val)} options={contacts} />
                         </div>
                         <UploadFile setDocument={setDocument} document={document} />
                         <div className="flex flex-col justify-start items-center">
