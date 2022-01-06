@@ -29,11 +29,7 @@ func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	authorizedUsers := r.Form.Get("contacts")
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
-	log.Println("Authorized users: " + authorizedUsers)
-
 	contactIDs := strings.Split(authorizedUsers, ",")
-
-	log.Println(contactIDs)
 
 	var approved []models.User
 	db.DB.Find(&approved, contactIDs)
@@ -51,9 +47,11 @@ func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 
 	localTitle := f.Name()
 
-	document := models.Document{Title: fileTitle, DocumentOwner: user.ID, Approved: approved, LocalTitle: localTitle}
+	document := models.Document{Title: fileTitle, DocumentOwner: user.ID, LocalTitle: localTitle}
 
 	result := db.DB.Create(&document)
+
+	db.DB.Model(&document).Association("approved_documents").Append(approved)
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -116,7 +114,7 @@ func processDocumentArrayForList(dList []models.Document, author string) []Docum
 
 		cur.Author = author
 
-		cur.Sent = (len(d.Approved) > 0)
+		cur.Sent = (db.DB.Model(&d).Association("approved_documents").Count() > 0)
 
 		final = append(final, cur)
 	}
@@ -130,7 +128,10 @@ func (api *Api) GetDocuments(w http.ResponseWriter, r *http.Request) {
 	var documents []models.Document
 	db.DB.Where("document_owner = ?", user.ID).Find(&documents)
 
-	body, err := json.Marshal(processDocumentArrayForList(documents, user.Name))
+	var approvedDocuments []models.Document
+	db.DB.Model(&user).Association("approved_documents").Find(&approvedDocuments)
+
+	body, err := json.Marshal(processDocumentArrayForList(append(documents, approvedDocuments...), user.Name))
 	if err != nil {
 		log.Println("Error getting documents data")
 	}
@@ -151,11 +152,9 @@ func (api *Api) GetDocument(w http.ResponseWriter, r *http.Request) {
 
 	found := doc.DocumentOwner == user.ID
 
-	for _, u := range doc.Approved {
-		if u.ID == user.ID {
-			found = true
-			break
-		}
+	if !found {
+		count := db.DB.Model(&user).Where("document_id = ?", doc).Association("approved_documents").Count()
+		found = (count == 1)
 	}
 
 	if !found {
