@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type DocumentResponse struct {
@@ -28,15 +29,14 @@ func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	authorizedUsers := r.Form.Get("contacts")
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
-	// Unpacking authorized users, finding in DB
-	var contacts []string
-	err = json.Unmarshal([]byte(authorizedUsers), &contacts)
-	if err != nil {
-		log.Panicln(err)
-	}
+	log.Println("Authorized users: " + authorizedUsers)
+
+	contactIDs := strings.Split(authorizedUsers, ",")
+
+	log.Println(contactIDs)
 
 	var approved []models.User
-	db.DB.Find(&approved, contacts)
+	db.DB.Find(&approved, contactIDs)
 
 	f, err := ioutil.TempFile(api.tempDir, "")
 	if err != nil {
