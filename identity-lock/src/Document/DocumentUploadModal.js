@@ -8,6 +8,7 @@ import { ContactSelect } from "../Components/ContactSelect"
 import { CustomModal } from "../Components/CustomModal"
 import { UploadFile } from "../Components/UploadFile"
 import useNetwork from "../Network/useNetwork";
+import { Link } from "react-router-dom";
 
 const ReplyHandler = ({ reply, reset, close }) => {
     return (
@@ -45,10 +46,11 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
     useEffect(async () => {
         const resp = await apiGet('/api/getcontacts')
         const options = []
-        for (const contact of resp) {
-            options.push({label: contact.name, value: contact.id})
+        if (resp) {
+            for (const contact of resp) {
+                options.push({label: contact.name, value: contact.id})
+            }
         }
-        console.log(options)
         setContacts(options)
     }, [])
 
@@ -62,7 +64,9 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
         const data = new FormData()
         data.append('document', document)
         data.append('title', documentName)
+        sharedList.map((v, i) => v.value)
         data.append('contacts', sharedList)
+        console.log(sharedList)
         setReplyLoading(true)
         const resp = await multipartFormPost('/api/upload', data)
         console.log(resp)
@@ -77,7 +81,6 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
         setDocument(null)
         setReply(false)
     }
-
 
     return (
         <CustomModal open={true} display={closeModal}>
@@ -99,8 +102,8 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
                                 />
                             </div>
                         </div>
-                        <div className="py-4 sm:py-5 sm:grid grid-cols-3 sm:gap-4 sm:px-6">
-                            <Select isMulti={true} onChange={(val) => setSharedList(val)} options={contacts} />
+                        <div className="py-4 sm:py-5 sm:grid sm:gap-4 sm:px-6">
+                            {contacts.length ? <Select isMulti={true} onChange={(val) => setSharedList(val)} options={contacts} /> : <div className="text-grey-700 text-center">Find contacts to add in the <Link className="text-blue-600" to={"/contacts"}>Contacts</Link> tab</div>}
                         </div>
                         <UploadFile setDocument={setDocument} document={document} />
                         <div className="flex flex-col justify-start items-center">
