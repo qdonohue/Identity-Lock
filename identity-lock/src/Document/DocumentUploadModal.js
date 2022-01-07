@@ -33,7 +33,7 @@ const ReplyHandler = ({ reply, reset, close }) => {
 }
 
 
-export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
+export const DocumentUploadModal = ({ closeModal }) => {
     const { multipartFormPost, apiGet } = useNetwork()
     const [documentName, setDocumentName] = useState(null)
     const [contacts, setContacts] = useState([])
