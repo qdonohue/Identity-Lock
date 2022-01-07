@@ -22,21 +22,14 @@ export const Documents = () => {
     const openManagementModal = (id) => {
         setDocumentManagementModal(id)
     }
-
-    const addDocument = (data) => {
-        data["sharedWith"] = people
-        documents.push(data)
-        setDocuments(documents)
-        setDocumentUploadModal(null)
-    }
-
+    
     const viewDoc = (document) => {
         history.push('/viewdocument/' + document.id + '/' + encodeURI(document.name))
     }
 
     return (
         <div className="flex flex-col align-center items-center justify-start max-h-screen">
-            {documentUploadModal && <DocumentUploadModal closeModal={() => setDocumentUploadModal(null)} uploadDocument={addDocument} />}
+            {documentUploadModal && <DocumentUploadModal closeModal={() => setDocumentUploadModal(null)}/>}
             {(documentManagementModal || documentManagementModal == 0) && <DocumentManagementModal documentID={documentManagementModal} viewDocument={viewDoc} closeModal={() => setDocumentManagementModal(null)} />}
             <DocumentTableHeader count={documents.length} openNewDocumentModal={setDocumentUploadModal} />
             <DocumentTable documents={documents} documentManagementModal={openManagementModal} />
