@@ -32,7 +32,7 @@ export const Documents = () => {
     const { apiGet } = useNetwork();
     const history = useHistory();
     const [documents, setDocuments] = useState([])
-    const [documentManagementModal, setDocumentManagementModal] = useState({ active: false, id: null })
+    const [documentManagementModal, setDocumentManagementModal] = useState(null)
     const [documentUploadModal, setDocumentUploadModal] = useState(null)
     
     useEffect(async () => {
@@ -41,7 +41,7 @@ export const Documents = () => {
     }, [documentManagementModal, documentUploadModal])
 
     const openManagementModal = (id) => {
-        setDocumentManagementModal({ active: true, id })
+        setDocumentManagementModal(id)
     }
 
     const addDocument = (data) => {
@@ -58,7 +58,7 @@ export const Documents = () => {
     return (
         <div className="flex flex-col align-center items-center justify-start max-h-screen">
             {documentUploadModal && <DocumentUploadModal closeModal={() => setDocumentUploadModal(null)} uploadDocument={addDocument} />}
-            {documentManagementModal.active && <DocumentManagementModal document={documents[documentManagementModal.id]} viewDocument={viewDoc} closeModal={() => setDocumentManagementModal({ active: false, id: null })} />}
+            {(documentManagementModal || documentManagementModal == 0) && <DocumentManagementModal documentID={documentManagementModal} viewDocument={viewDoc} closeModal={() => setDocumentManagementModal(null)} />}
             <DocumentTableHeader count={documents.length} openNewDocumentModal={setDocumentUploadModal} />
             <DocumentTable documents={documents} documentManagementModal={openManagementModal} />
         </div>

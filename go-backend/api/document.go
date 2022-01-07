@@ -139,30 +139,35 @@ func processApprovedUsersForList(uList []*models.User, uID uint) []approvedUserL
 	return final
 }
 
+func processDocument(d *models.Document, uID uint) documentListDocument {
+	var curDoc models.Document
+	db.DB.Preload("ApprovedViewers").Find(&curDoc)
+	var cur documentListDocument
+
+	cur.Title = d.Title
+	cur.ID = d.ID
+
+	date := d.CreatedAt
+	cur.UploadedDate = fmt.Sprintf("%d/%d/%d", date.Month(), date.Day(), date.Year())
+
+	var author models.User
+	db.DB.Where("id = ?", d.DocumentOwner).Find(&author)
+
+	cur.Author = author.Name
+
+	cur.ApprovedViewers = processApprovedUsersForList(curDoc.ApprovedViewers, d.DocumentOwner)
+
+	cur.Owner = curDoc.DocumentOwner == uID
+
+	return cur
+}
+
 // Document name, sent, uploaded by (author), uploaded date
 func processDocumentArrayForList(dList []*models.Document, uID uint) []documentListDocument {
 	var final []documentListDocument
 
 	for _, d := range dList {
-		var curDoc models.Document
-		db.DB.Preload("ApprovedViewers").Find(&curDoc)
-		var cur documentListDocument
-
-		cur.Title = d.Title
-		cur.ID = d.ID
-
-		date := d.CreatedAt
-		cur.UploadedDate = fmt.Sprintf("%d/%d/%d", date.Month(), date.Day(), date.Year())
-
-		var author models.User
-		db.DB.Where("id = ?", d.DocumentOwner).Find(&author)
-
-		cur.Author = author.Name
-
-		cur.ApprovedViewers = processApprovedUsersForList(curDoc.ApprovedViewers, d.DocumentOwner)
-
-		cur.Owner = curDoc.DocumentOwner == uID
-
+		cur := processDocument(d, uID)
 		final = append(final, cur)
 	}
 
@@ -186,8 +191,43 @@ func (api *Api) GetDocuments(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
+func (api *Api) GetDocumentInformation(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
+
+	docID := r.URL.Query()["id"][0]
+
+	var doc *models.Document
+	db.DB.Preload("ApprovedViewers").Find(&doc, docID)
+
+	found := doc.DocumentOwner == user.ID
+
+	if !found {
+		for _, p := range doc.ApprovedViewers {
+			if p.ID == user.ID {
+				found = true
+				break
+			}
+		}
+	}
+
+	if !found {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("You don't have access to that document"))
+		return
+	}
+
+	body, err := json.Marshal(processDocument(doc, user.ID))
+	if err != nil {
+		log.Println("Error getting documents data")
+	}
+
+	w.WriteHeader(http.StatusOK)
+
+	w.Write(body)
+}
+
 // Get request, w/ document uuid posted
-func (api *Api) GetDocument(w http.ResponseWriter, r *http.Request) {
+func (api *Api) GetDocumentFile(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
 	docID := r.URL.Query()["id"][0]
