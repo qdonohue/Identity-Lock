@@ -64,8 +64,7 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
         const data = new FormData()
         data.append('document', document)
         data.append('title', documentName)
-        console.log(sharedList)
-        const preparedContacts = sharedList.map((v, i) => v.value)
+        const preparedContacts = sharedList ? sharedList.map((v, i) => v.value) : []
         data.append('contacts', preparedContacts)
         setReplyLoading(true)
         const resp = await multipartFormPost('/api/upload', data)

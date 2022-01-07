@@ -16,9 +16,9 @@
 ## TODO:
 - How to manage contacts being visible to others? Being open to everyone on site prob a no go (especially not contact photo... but maybe for someone who is added? That requires an element of opt-in on contact add invite)
 - Search options --> search by email or name
-- Indicator that you're only looking at current contacts
 - Standarize badge into modal too?
-- Loading indicator
+
+- Get authorized users for document --> verify that model is storing this array correctly!
 
 ## Contact Selection
 - Feed contacts into search-async component

@@ -31,7 +31,7 @@ func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 
 	contactIDs := strings.Split(authorizedUsers, ",")
 
-	var approved []models.User
+	var approved []*models.User
 	db.DB.Find(&approved, contactIDs)
 
 	f, err := ioutil.TempFile(api.tempDir, "")
@@ -47,11 +47,9 @@ func (api *Api) UploadDocument(w http.ResponseWriter, r *http.Request) {
 
 	localTitle := f.Name()
 
-	document := models.Document{Title: fileTitle, DocumentOwner: user.ID, LocalTitle: localTitle}
+	document := models.Document{Title: fileTitle, DocumentOwner: user.ID, LocalTitle: localTitle, ApprovedViewers: approved}
 
 	result := db.DB.Create(&document)
-
-	db.DB.Model(&document).Association("approved_documents").Append(approved)
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -88,23 +86,67 @@ func (api *Api) DeleteDocument(w http.ResponseWriter, r *http.Request) {
 		body, _ := json.Marshal(DocumentResponse{Success: false})
 		w.Write(body)
 	}
-
 }
 
-type DocumentListDocument struct {
-	Title        string `json:"name"`
-	ID           uint   `json:"id"`
-	UploadedDate string `json:"uploaded"`
-	Author       string `json:"author"`
-	Sent         bool   `json:"distributed"`
+func (api *Api) RemoveApprovedViewer(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
+
+	contactID := r.URL.Query()["contact_id"][0]
+	documentID := r.URL.Query()["document_id"][0]
+
+	var doc models.Document
+	db.DB.Where("id = ?", documentID).Find(&doc)
+
+	if doc.DocumentOwner != user.ID {
+		w.WriteHeader(http.StatusUnauthorized)
+	}
+
+	db.DB.Model(&doc).Association("approved_documents").Delete(contactID)
+
+	db.DB.Where("user_id = ? AND document_id", contactID, documentID).Association("approved_documents").Delete()
+
+	w.WriteHeader(http.StatusOK)
+}
+
+type documentListDocument struct {
+	Title           string                 `json:"name"`
+	ID              uint                   `json:"id"`
+	UploadedDate    string                 `json:"uploaded"`
+	Author          string                 `json:"author"`
+	Owner           bool                   `json:"owner"`
+	ApprovedViewers []approvedUserListUser `json:"approved"`
+}
+
+type approvedUserListUser struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	ID    uint   `json:"id"`
+}
+
+func processApprovedUsersForList(uList []*models.User, uID uint) []approvedUserListUser {
+	var final []approvedUserListUser
+
+	for _, u := range uList {
+		if u.ID == uID {
+			continue
+		}
+
+		cur := approvedUserListUser{Email: u.Email, Name: u.Name, ID: u.ID}
+
+		final = append(final, cur)
+	}
+
+	return final
 }
 
 // Document name, sent, uploaded by (author), uploaded date
-func processDocumentArrayForList(dList []models.Document, author string) []DocumentListDocument {
-	var final []DocumentListDocument
+func processDocumentArrayForList(dList []*models.Document, uID uint) []documentListDocument {
+	var final []documentListDocument
 
 	for _, d := range dList {
-		var cur DocumentListDocument
+		var curDoc models.Document
+		db.DB.Preload("ApprovedViewers").Find(&curDoc)
+		var cur documentListDocument
 
 		cur.Title = d.Title
 		cur.ID = d.ID
@@ -112,9 +154,14 @@ func processDocumentArrayForList(dList []models.Document, author string) []Docum
 		date := d.CreatedAt
 		cur.UploadedDate = fmt.Sprintf("%d/%d/%d", date.Month(), date.Day(), date.Year())
 
-		cur.Author = author
+		var author models.User
+		db.DB.Where("id = ?", d.DocumentOwner).Find(&author)
 
-		cur.Sent = (db.DB.Model(&d).Association("approved_documents").Count() > 0)
+		cur.Author = author.Name
+
+		cur.ApprovedViewers = processApprovedUsersForList(curDoc.ApprovedViewers, d.DocumentOwner)
+
+		cur.Owner = curDoc.DocumentOwner == uID
 
 		final = append(final, cur)
 	}
@@ -125,13 +172,11 @@ func processDocumentArrayForList(dList []models.Document, author string) []Docum
 func (api *Api) GetDocuments(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
-	var documents []models.Document
-	db.DB.Where("document_owner = ?", user.ID).Find(&documents)
+	db.DB.Preload("Documents").Preload("ApprovedDocuments").Find(&user)
 
-	var approvedDocuments []models.Document
-	db.DB.Model(&user).Association("approved_documents").Find(&approvedDocuments)
+	combined := append(user.ApprovedDocuments, user.Documents...)
 
-	body, err := json.Marshal(processDocumentArrayForList(append(documents, approvedDocuments...), user.Name))
+	body, err := json.Marshal(processDocumentArrayForList(combined, user.ID))
 	if err != nil {
 		log.Println("Error getting documents data")
 	}

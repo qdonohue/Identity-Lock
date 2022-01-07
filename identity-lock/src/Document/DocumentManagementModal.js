@@ -46,14 +46,14 @@ export const DocumentManagementModal = ({ document, viewDocument, closeModal }) 
         <CustomModal open={true} display={closeModal}>
             <div className="bg-white shadow overflow-hidden sm:rounded-lg">
                 <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Document Information</h3>
-                    <button
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">{document.owner ? "Document Information" : `Shared by ${document.author}`}</h3>
+                    {document.owner && <button
                         type="button"
                         onClick={deleteDocument}
                         className="bg-white-800 p-1 mr-5 my-auto rounded-full hover:bg-blue-200"
                     >
                         <DocumentRemoveIcon className="h-10 w-10 text-red-500" aria-hidden="true" />
-                    </button>
+                    </button>}
                 </div>
                 <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
                     <dl className="sm:divide-y sm:divide-gray-200">
