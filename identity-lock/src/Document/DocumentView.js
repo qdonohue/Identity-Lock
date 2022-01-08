@@ -41,7 +41,7 @@ const PDFHeader = ({ title, back, pageCount }) => {
 
 export const DocumentView = () => {
     const webcamRef = useRef(null);
-    const { multipartFormPost, fileGet } = useNetwork()
+    const { multipartFormPost, fileGet, apiGet } = useNetwork()
     const { user } = useAuth0()
     const { id, title } = useParams()
     const history = useHistory();
@@ -86,7 +86,7 @@ export const DocumentView = () => {
     }, [document])
 
     const forceAlert = async () => {
-        await multipartFormPost('/api/createalert', {documentID: id})
+        await apiGet('/api/createalert', {id: id})
     }
 
     function onDocumentLoadSuccess({ numPages }) {

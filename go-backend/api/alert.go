@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"gorm.io/gorm"
 )
 
 type AlertListAlert struct {
@@ -84,34 +86,17 @@ func (api *Api) GetAlertInfo(w http.ResponseWriter, r *http.Request) {
 
 func (api *Api) CreateOrUpdateAlert(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
-	r.ParseMultipartForm(32 << 20) // limit your max input length!
-	documentID := r.Form.Get("documentID")
 
-	// Check if the alert exists
-	type Result struct {
-		ID    uint
-		Count int
-	}
+	docID := r.URL.Query()["id"][0]
 
-	var res Result
-	// tx := db.DB.Where("violator = ? AND document = ?", user.ID, documentID).Find(&existingAlert)
-	tx := db.DB.Raw("SELECT id, count from alerts where violator = ? AND document = ?", user.ID, documentID).Scan(&res)
+	log.Println("Document ID is: " + docID)
 
-	log.Println(tx.RowsAffected)
+	var existing models.Alerts
+	tx := db.DB.Model(&models.Alerts{}).Where("document = ? AND violator = ?", docID, user.ID).First(&existing)
 
-	if tx.RowsAffected == 1 {
-		var existingAlert models.Alerts
-		db.DB.Where("id = ?", res.ID).Find(&existingAlert)
-		log.Println("existing alert found")
-		log.Println(existingAlert)
-		db.DB.Model(&existingAlert).Where("id = ?", existingAlert.ID).Update("count", (res.Count + 1))
-		w.WriteHeader(http.StatusOK)
-	} else {
-		log.Println("Novel alert found")
+	if tx.Error == gorm.ErrRecordNotFound {
 		var document models.Document
-		db.DB.Find(&document, documentID)
-
-		log.Println(document)
+		db.DB.Find(&document, docID)
 
 		// Do what you want if it's your document...
 		if document.DocumentOwner == user.ID {
@@ -123,6 +108,9 @@ func (api *Api) CreateOrUpdateAlert(w http.ResponseWriter, r *http.Request) {
 
 		db.DB.Create(&alert)
 		w.WriteHeader(http.StatusCreated)
+	} else {
+		db.DB.Model(&existing).Update("count", (existing.Count + 1))
+		w.WriteHeader(http.StatusOK)
 	}
 }
 

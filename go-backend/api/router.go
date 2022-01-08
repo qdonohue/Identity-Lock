@@ -24,6 +24,5 @@ func (a *Api) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/api/removecontact", a.RemoveContact)
 	r.HandleFunc("/api/getalerts", a.GetAlerts).Methods("GET")
 	r.HandleFunc("/api/getalert", a.GetAlertInfo).Methods("GET")
-	r.HandleFunc("/api/createalert", a.CreateOrUpdateAlert).Methods("POST")
-
+	r.HandleFunc("/api/createalert", a.CreateOrUpdateAlert)
 }
