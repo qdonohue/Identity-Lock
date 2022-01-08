@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import AsyncSelect from 'react-select/async';
+import Select from 'react-select'
 
 import { DocumentAddIcon, CheckCircleIcon, EmojiSadIcon } from "@heroicons/react/outline"
 import Loader from "react-loader-spinner";
@@ -7,6 +8,7 @@ import { ContactSelect } from "../Components/ContactSelect"
 import { CustomModal } from "../Components/CustomModal"
 import { UploadFile } from "../Components/UploadFile"
 import useNetwork from "../Network/useNetwork";
+import { Link } from "react-router-dom";
 
 const ReplyHandler = ({ reply, reset, close }) => {
     return (
@@ -31,15 +33,26 @@ const ReplyHandler = ({ reply, reset, close }) => {
 }
 
 
-export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
-    const { multipartFormPost } = useNetwork()
+export const DocumentUploadModal = ({ closeModal }) => {
+    const { multipartFormPost, apiGet } = useNetwork()
     const [documentName, setDocumentName] = useState(null)
+    const [contacts, setContacts] = useState([])
     const [sharedList, setSharedList] = useState(null)
     const [document, setDocument] = useState(null)
     const [readyForSubmit, setReadyForSubmit] = useState(false)
     const [replyLoading, setReplyLoading] = useState(false)
-    // const [reply, setReply] = useState(false)
     const [reply, setReply] = useState(false)
+
+    useEffect(async () => {
+        const resp = await apiGet('/api/getcontacts')
+        const options = []
+        if (resp) {
+            for (const contact of resp) {
+                options.push({ label: contact.name, value: contact.id })
+            }
+        }
+        setContacts(options)
+    }, [])
 
     useEffect(() => {
         const ready = !!(documentName && document)
@@ -51,10 +64,10 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
         const data = new FormData()
         data.append('document', document)
         data.append('title', documentName)
-        data.append('contacts', sharedList)
+        const preparedContacts = sharedList ? sharedList.map((v, i) => v.value) : []
+        data.append('contacts', preparedContacts)
         setReplyLoading(true)
         const resp = await multipartFormPost('/api/upload', data)
-        console.log(resp)
         setReplyLoading(false)
         const suc = resp?.data?.Success
         setReply(suc ? suc : false)
@@ -67,17 +80,6 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
         setReply(false)
     }
 
-    const loadOptions = async (val) => {
-        return [
-            { value: 'Calvin Hawkins', label: 'Calvin Hawkins' },
-            { value: "Kristen Ramos", label: "Kristen Ramos" },
-            { value: "Ted Fox", label: "Ted Fox" },
-            { value: "Will Donohue", label: "Will Donohue" },
-            { value: "Scott Donohue", label: "Scott Donohue" },
-        ]
-    }
-
-
     return (
         <CustomModal open={true} display={closeModal}>
             <div className="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -87,25 +89,24 @@ export const DocumentUploadModal = ({ closeModal, uploadDocument }) => {
                 <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
                     {replyLoading ? <div className="flex items-center justify-center m-20" ><Loader type="Circles" color="#1565c0" height={120} width={120} /></div> : reply ? <ReplyHandler reply={reply} reset={reset} close={closeModal} /> : <dl className="sm:divide-y sm:divide-gray-200">
                         <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Name</dt>
-                            <div className="mt-1 sm:mt-0 sm:col-span-2">
+                            <div className="flex flex-col col-span-3">
+                            <div className="col-span-3 text-sm font-medium text-gray-500 text-center mb-2">Document Name</div>
+                            <div className="mt-1 sm:mt-0 sm:col-span-3">
                                 <input
                                     type="text"
                                     name="title"
                                     id="title"
-                                    className="block max-w-lg w-full py-1 border-black border shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md"
+                                    className="block mx-auto max-w-lg w-full py-1 border-black border shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md"
                                     onInput={(evt) => { setDocumentName(evt.target.value) }}
                                 />
                             </div>
+                            </div>
                         </div>
-                        <div className="py-4 sm:py-5 sm:grid grid-cols-3 sm:gap-4 sm:px-6">
-                            <AsyncSelect className="w-96"
-                                isMulti
-                                cacheOptions
-                                defaultOptions
-                                loadOptions={loadOptions}
-                                onChange={(val) => setSharedList(val)}
-                            />
+                        <div className="py-4 sm:py-5 sm:grid sm:gap-4 sm:px-6">
+                            <div className="flex flex-col col-span-3">
+                                <div className="col-span-3 text-sm font-medium text-gray-500 text-center mb-2">Approved Viewers (optional)</div>
+                                {contacts.length ? <Select placeholder={"Select approved viewers"} isMulti={true} onChange={(val) => setSharedList(val)} options={contacts} /> : <div className="text-grey-700 text-center">Find contacts to add in the <Link className="text-blue-600" to={"/contacts"}>Contacts</Link> tab</div>}
+                            </div>
                         </div>
                         <UploadFile setDocument={setDocument} document={document} />
                         <div className="flex flex-col justify-start items-center">

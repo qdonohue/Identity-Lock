@@ -12,7 +12,7 @@ import { Home } from './Home';
 import NavBar from './navbar';
 import { Signup } from './Signup/Signup';
 import { Documents } from './Document/Documents';
-import { Contacts } from './Contacts';
+import { Contacts } from './Contacts/Contacts';
 import { Alerts } from './Alerts';
 import './App.css';
 import { DocumentView } from './Document/DocumentView';

@@ -27,6 +27,9 @@ func main() {
 		log.Fatalf("Error connecting to DB")
 	}
 
+	// DB SEED CODE:
+	seedDBUsers()
+
 	face_key := os.Getenv("FACE_SUBSCRIPTION_KEY")
 	face_endpoint := os.Getenv("FACE_ENDPOINT")
 	person_group_label := os.Getenv("PERSON_GROUP_LABEL")
