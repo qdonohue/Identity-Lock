@@ -1,13 +1,22 @@
 
-const distributedBadge = (sent) => {
+const distributedBadge = (sent, owner) => {
+
+    if (!owner) {
+        return (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                Recieved
+            </span>
+        )
+    }
+
     return (sent ? <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
         Sent
     </span> : <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-        Waiting
+        Unshared
     </span>)
 }
 
-export const DocumentTable = ({documents, documentManagementModal}) => {
+export const DocumentTable = ({ documents, documentManagementModal }) => {
 
     return (
         <div className="flex-1 flex flex-col px-5 mx-10 w-full">
@@ -27,7 +36,7 @@ export const DocumentTable = ({documents, documentManagementModal}) => {
                                         scope="col"
                                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                     >
-                                        Sent
+                                        Status
                                     </th>
                                     <th
                                         scope="col"
@@ -44,9 +53,9 @@ export const DocumentTable = ({documents, documentManagementModal}) => {
                             </thead>
                             <tbody className="divide-y">
                                 {documents.map((document, documentIdx) => (
-                                    <tr key={documentIdx} className="bg-white hover:bg-gray-100 cursor-pointer" onClick={() => {documentManagementModal(document.id)}}>
+                                    <tr key={documentIdx} className="bg-white hover:bg-gray-100 cursor-pointer" onClick={() => { documentManagementModal(document.id) }}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{document.name}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{distributedBadge(document.approved)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{distributedBadge(document.approved, document.owner)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{document.author}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{document.uploaded}</td>
                                     </tr>

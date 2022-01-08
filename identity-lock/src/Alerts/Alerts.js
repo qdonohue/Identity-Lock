@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react"
 
 import useNetwork from "../Network/useNetwork"
-import { useHistory } from "react-router-dom"
 import { AlertTableHeader } from "./AlertTableHeader"
 import { AlertTable } from "./AlertTable"
-// import { AlertManagementModal } from "./AlertManagementModal"
+import { AlertManagementModal } from "./AlertManagementModal"
 
 export const Alerts = () => {
     const { apiGet } = useNetwork();
-    const history = useHistory();
     const [alerts, setAlerts] = useState([])
     const [alertManagementModal, setAlertManagementModal] = useState(null)
-    // const [documentUploadModal, setUploadModal] = useState(null)
     
     useEffect(async () => {
         const alertList = await apiGet("/api/getalerts")
@@ -19,16 +16,14 @@ export const Alerts = () => {
     }, [alertManagementModal])
 
     const openManagementModal = (id) => {
+        console.log("Open request w/ id: " + id)
         setAlertManagementModal(id)
     }
-    
-    const viewDoc = (document) => {
-        history.push('/viewdocument/' + document.id + '/' + encodeURI(document.name))
-    }
+
 
     return (
         <div className="flex flex-col align-center items-center justify-start max-h-screen">
-            {/* {(alertManagementModal || alertManagementModal == 0) && <AlertManagementModal />} */}
+            {(alertManagementModal || alertManagementModal == 0) && <AlertManagementModal id={alertManagementModal} closeModal={() => setAlertManagementModal(null)}/>}
             <AlertTableHeader count={alerts.length} />
             <AlertTable alerts={alerts} alertManagementModal={openManagementModal}/>
         </div>

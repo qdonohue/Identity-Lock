@@ -25,7 +25,10 @@ func processAlert(a *models.Alerts, u models.User) AlertListAlert {
 	var doc models.Document
 	db.DB.Where("id = ?", a.Document).Find(&doc)
 
-	cur := AlertListAlert{ID: a.ID, DocumentName: doc.Title, Violator: u.Name, ViolatorID: u.ID, Count: a.Count}
+	var violator models.User
+	db.DB.Find(&violator, a.Violator)
+
+	cur := AlertListAlert{ID: a.ID, DocumentName: doc.Title, Violator: violator.Name, ViolatorID: a.Violator, Count: a.Count}
 
 	date := a.UpdatedAt
 	cur.Date = fmt.Sprintf("%d/%d/%d", date.Month(), date.Day(), date.Year())
@@ -113,4 +116,21 @@ func (api *Api) CreateOrUpdateAlert(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *Api) DeleteAlert(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
+
+	alertID := r.URL.Query()["id"][0]
+
+	var alert models.Alerts
+	db.DB.Find(&alert, alertID)
+
+	if alert.DocumentOwner != user.ID {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("Only the document owner can manage alerts"))
+		return
+	}
+
+	// After prior struggle, just going to accept the EXEC method...
+	db.DB.Exec("DELETE FROM alerts where id = ?", alertID)
+
+	w.WriteHeader(http.StatusOK)
 }

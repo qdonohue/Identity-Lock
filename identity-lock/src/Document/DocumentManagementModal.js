@@ -92,10 +92,10 @@ export const DocumentManagementModal = ({ documentID, viewDocument, closeModal }
                                     (contacts.length ?
                                         <div className="flex flex-col col-span-3">
                                             <div className="col-span-3 text-sm font-medium text-gray-500 text-center mb-2">Approved Viewers</div>
-                                            <Select className="col-span-3" placeholder={"Select Contacts to add to document"} defaultValue={currentViewers} isMulti={true} onChange={(val) => { setApprovedList(val); !editOccured && setEditOccured(true) }} options={contacts} />
+                                            <Select className="col-span-3" maxMenuHeight={100} placeholder={"Select Contacts to add to document"} defaultValue={currentViewers} isMulti={true} onChange={(val) => { setApprovedList(val); !editOccured && setEditOccured(true) }} options={contacts} />
                                             {editOccured && <div className="col-span-3 text-center text-red-500 italic text-xs mt-2">Changes saved automatically</div>}
                                         </div>
-                                        : <div className="text-grey-700 text-center col-span-3">Find contacts to add in the <Link className="text-blue-600" to={"/contacts"}>Contacts</Link> tab</div>) : <div className="col-span-3">{`Only the document owner is allowed to see and modify approved viewers`}</div>}
+                                        : <div className="text-grey-700 text-center col-span-3">Find contacts to add in the <Link className="text-blue-600" to={"/contacts"}>Contacts</Link> tab</div>) : <div className="col-span-3 text-center text-m text-gray-700">{`Only the document owner is allowed to see and modify approved viewers`}</div>}
                             </div>
                             <div className="flex justify-center items-center align-center">
                                 <button

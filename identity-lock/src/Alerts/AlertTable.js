@@ -1,11 +1,6 @@
 
 export const AlertTable = ({alerts, alertManagementModal}) => {
 
-    // Need: 
-    // ID
-    // documentname
-    // Violation date
-    // Violation count
     return (
         <div className="flex-1 flex flex-col px-5 mx-10 w-full">
             <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">

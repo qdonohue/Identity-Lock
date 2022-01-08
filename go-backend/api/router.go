@@ -16,6 +16,7 @@ func (a *Api) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/api/getdocument", a.GetDocumentFile).Methods("GET")
 	r.HandleFunc("/api/deletedocument", a.DeleteDocument).Methods("GET")
 	r.HandleFunc("/api/setviewers", a.SetApprovedViewerList).Methods("POST")
+	r.HandleFunc("/api/removeviewer", a.RemoveViewerFromAlert).Methods("GET")
 	r.HandleFunc("/api/searchallcontacts", a.SearchAllContacts).Methods("GET")
 	r.HandleFunc("/api/searchusercontacts", a.SearchAllContacts).Methods("GET")
 	r.HandleFunc("/api/getcontact", a.GetContact).Methods("GET")
@@ -25,4 +26,5 @@ func (a *Api) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/api/getalerts", a.GetAlerts).Methods("GET")
 	r.HandleFunc("/api/getalert", a.GetAlertInfo).Methods("GET")
 	r.HandleFunc("/api/createalert", a.CreateOrUpdateAlert)
+	r.HandleFunc("/api/deletealert", a.DeleteAlert).Methods("GET")
 }
