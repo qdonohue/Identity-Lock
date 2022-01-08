@@ -104,7 +104,7 @@ export const DocumentUploadModal = ({ closeModal }) => {
                         </div>
                         <div className="py-4 sm:py-5 sm:grid sm:gap-4 sm:px-6">
                             <div className="flex flex-col col-span-3">
-                                <div className="col-span-3 text-sm font-medium text-gray-500 text-center mb-2">Approved Viewers</div>
+                                <div className="col-span-3 text-sm font-medium text-gray-500 text-center mb-2">Approved Viewers (optional)</div>
                                 {contacts.length ? <Select placeholder={"Select approved viewers"} isMulti={true} onChange={(val) => setSharedList(val)} options={contacts} /> : <div className="text-grey-700 text-center">Find contacts to add in the <Link className="text-blue-600" to={"/contacts"}>Contacts</Link> tab</div>}
                             </div>
                         </div>
