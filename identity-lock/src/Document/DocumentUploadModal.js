@@ -48,7 +48,7 @@ export const DocumentUploadModal = ({ closeModal }) => {
         const options = []
         if (resp) {
             for (const contact of resp) {
-                options.push({label: contact.name, value: contact.id})
+                options.push({ label: contact.name, value: contact.id })
             }
         }
         setContacts(options)
@@ -89,19 +89,24 @@ export const DocumentUploadModal = ({ closeModal }) => {
                 <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
                     {replyLoading ? <div className="flex items-center justify-center m-20" ><Loader type="Circles" color="#1565c0" height={120} width={120} /></div> : reply ? <ReplyHandler reply={reply} reset={reset} close={closeModal} /> : <dl className="sm:divide-y sm:divide-gray-200">
                         <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Name</dt>
-                            <div className="mt-1 sm:mt-0 sm:col-span-2">
+                            <div className="flex flex-col col-span-3">
+                            <div className="col-span-3 text-sm font-medium text-gray-500 text-center mb-2">Document Name</div>
+                            <div className="mt-1 sm:mt-0 sm:col-span-3">
                                 <input
                                     type="text"
                                     name="title"
                                     id="title"
-                                    className="block max-w-lg w-full py-1 border-black border shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md"
+                                    className="block mx-auto max-w-lg w-full py-1 border-black border shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md"
                                     onInput={(evt) => { setDocumentName(evt.target.value) }}
                                 />
                             </div>
+                            </div>
                         </div>
                         <div className="py-4 sm:py-5 sm:grid sm:gap-4 sm:px-6">
-                            {contacts.length ? <Select placeholder={"Select approved viewers"} isMulti={true} onChange={(val) => setSharedList(val)} options={contacts} /> : <div className="text-grey-700 text-center">Find contacts to add in the <Link className="text-blue-600" to={"/contacts"}>Contacts</Link> tab</div>}
+                            <div className="flex flex-col col-span-3">
+                                <div className="col-span-3 text-sm font-medium text-gray-500 text-center mb-2">Approved Viewers</div>
+                                {contacts.length ? <Select placeholder={"Select approved viewers"} isMulti={true} onChange={(val) => setSharedList(val)} options={contacts} /> : <div className="text-grey-700 text-center">Find contacts to add in the <Link className="text-blue-600" to={"/contacts"}>Contacts</Link> tab</div>}
+                            </div>
                         </div>
                         <UploadFile setDocument={setDocument} document={document} />
                         <div className="flex flex-col justify-start items-center">
