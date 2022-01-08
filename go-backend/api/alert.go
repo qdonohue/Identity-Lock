@@ -89,8 +89,6 @@ func (api *Api) CreateOrUpdateAlert(w http.ResponseWriter, r *http.Request) {
 
 	docID := r.URL.Query()["id"][0]
 
-	log.Println("Document ID is: " + docID)
-
 	var existing models.Alerts
 	tx := db.DB.Model(&models.Alerts{}).Where("document = ? AND violator = ?", docID, user.ID).First(&existing)
 

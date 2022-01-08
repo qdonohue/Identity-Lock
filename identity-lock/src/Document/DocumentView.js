@@ -68,8 +68,9 @@ export const DocumentView = () => {
     );
 
     useEffect(async () => {
-        if (!accessGranted) {
-            await multipartFormPost('/api/createalert', {documentID: id})
+        // Alert IFF access denied b/c unrecognized faces
+        if (!accessGranted && reply.FaceCount != 0) {
+            await apiGet('/api/createalert', { id: id })
         }
     }, [accessGranted])
 
@@ -81,12 +82,12 @@ export const DocumentView = () => {
     }, [])
 
     useEffect(async () => {
-        const reply = await fileGet('/api/getdocument', {id: id})
+        const reply = await fileGet('/api/getdocument', { id: id })
         setPdf(reply)
     }, [document])
 
     const forceAlert = async () => {
-        await apiGet('/api/createalert', {id: id})
+        await apiGet('/api/createalert', { id: id })
     }
 
     function onDocumentLoadSuccess({ numPages }) {
@@ -95,7 +96,7 @@ export const DocumentView = () => {
 
     return (
         <div className="flex flex-col justify-center">
-        <div onClick={forceAlert}>Looks ugly click here to force alert</div>
+            <div onClick={forceAlert}>Looks ugly click here to force alert</div>
 
             {accessGranted ?
                 <div className="flex justify-center">
@@ -103,16 +104,16 @@ export const DocumentView = () => {
                     {(pageNumber > 1) ? <div className="m-auto" onClick={() => { setPageNumber(pageNumber - 1) }} ><ChevronLeftIcon className="w-20 h-20" /> </div> : <div className="m-auto"> </div>}
 
                     <div className="flex flex-col place-items-center">
-                        <PDFHeader title={decodeURI(title)} back={() => {history.push('/documents')}} pageCount={`(page ${pageNumber} of ${numPages})`} />
+                        <PDFHeader title={decodeURI(title)} back={() => { history.push('/documents') }} pageCount={`(page ${pageNumber} of ${numPages})`} />
                         {pdf ? <Document
                             className="border-2 border-grey"
                             file={pdf}
                             onLoadSuccess={onDocumentLoadSuccess}
                         >
                             <Page pageNumber={pageNumber} />
-                        </Document> 
-                        : 
-                        <div className="flex items-center justify-center m-20" ><Loader type="Circles" color="#1565c0" height={120} width={120} /></div>
+                        </Document>
+                            :
+                            <div className="flex items-center justify-center m-20" ><Loader type="Circles" color="#1565c0" height={120} width={120} /></div>
                         }
                     </div>
 
@@ -126,18 +127,14 @@ export const DocumentView = () => {
                     <div className="text-red-800 text-4xl text-center">VIOLATION DETECTED</div>
                     <XCircleIcon className="text-red-800 h-72 w-72" />
                     <div className="text-black text-2xl text-center">
-                        {(reply.FaceCount != 1) &&
-                            <span>There are {reply.FaceCount > 1 ? `too many faces detected (${reply.FaceCount})` : "no faces detected"} </span>
-                        }
-                        {(reply.FaceCount == 1) && <span>Failed to identify {user.name} (Match threshold of only {reply.Confidence * 100}%)</span>}
+                        {(reply.FaceCount == 0) ? <span>Are you still reading?</span> : <p className="w-2/6 text-center mx-auto">Unapproved viewer detected - the document owner has been notified. Move to a private space without others to continue viewing.</p>}
                     </div>
-                    <div className="text-red text-l text-center">The document owner has been notified</div>
                     <button
                         type="button"
                         onClick={capture}
                         className="inline-flex items-center mt-20 w-30 px-2.5 py-1.5 border border-transparent text-s font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
-                        I promise I'll be good
+                        {reply.FaceCount ? "I'm by myself" : "I'm back"}
                     </button>
                 </div>}
 

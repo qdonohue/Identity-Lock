@@ -248,13 +248,17 @@ func (api *Api) GetDocumentFile(w http.ResponseWriter, r *http.Request) {
 	docID := r.URL.Query()["id"][0]
 
 	var doc models.Document
-	db.DB.Find(&doc, docID)
+	db.DB.Preload("ApprovedViewers").Find(&doc, docID)
 
 	found := doc.DocumentOwner == user.ID
 
 	if !found {
-		count := db.DB.Model(&user).Where("document_id = ?", doc).Association("approved_documents").Count()
-		found = (count == 1)
+		for _, u := range doc.ApprovedViewers {
+			if u.ID == user.ID {
+				found = true
+				break
+			}
+		}
 	}
 
 	if !found {
