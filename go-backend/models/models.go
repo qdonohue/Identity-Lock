@@ -13,7 +13,7 @@ type User struct {
 	Documents         []*Document `gorm:"foreignKey:DocumentOwner;constraint:OnDelete:SET NULL;"`
 	ApprovedDocuments []*Document `gorm:"many2many:approved_documents;"`
 	Contacts          []*User     `gorm:"many2many:contacts;"`
-	Violations        []Violation `gorm:"foreignKey:Violator"`
+	Alerts            []Alerts    `gorm:"foreignKey:DocumentOwner"`
 	FaceKey           uuid.UUID
 }
 
@@ -25,12 +25,13 @@ type Document struct {
 	ApprovedViewers []*User `gorm:"many2many:approved_documents;constraint:OnDelete:SET NULL;"`
 }
 
-type Violation struct {
+type Alerts struct {
 	gorm.Model
-	Document Document `gorm:"foreignKey:ID"`
-	Violator uint
+	Document      Document `gorm:"foreignKey:ID"`
+	DocumentOwner uint
+	Violator      User
 }
 
 func MakeMigrations(db *gorm.DB) error {
-	return db.AutoMigrate(&User{}, &Document{}, &Violation{})
+	return db.AutoMigrate(&User{}, &Document{}, &Alerts{})
 }

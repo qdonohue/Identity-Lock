@@ -13,7 +13,7 @@ import NavBar from './navbar';
 import { Signup } from './Signup/Signup';
 import { Documents } from './Document/Documents';
 import { Contacts } from './Contacts/Contacts';
-import { Alerts } from './Alerts';
+import { Alerts } from './Alerts/Alerts';
 import './App.css';
 import { DocumentView } from './Document/DocumentView';
 import { ProfilePage } from './ProfilePage';
