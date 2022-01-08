@@ -101,7 +101,7 @@ export const DocumentUploadModal = ({ closeModal }) => {
                             </div>
                         </div>
                         <div className="py-4 sm:py-5 sm:grid sm:gap-4 sm:px-6">
-                            {contacts.length ? <Select isMulti={true} onChange={(val) => setSharedList(val)} options={contacts} /> : <div className="text-grey-700 text-center">Find contacts to add in the <Link className="text-blue-600" to={"/contacts"}>Contacts</Link> tab</div>}
+                            {contacts.length ? <Select placeholder={"Select approved viewers"} isMulti={true} onChange={(val) => setSharedList(val)} options={contacts} /> : <div className="text-grey-700 text-center">Find contacts to add in the <Link className="text-blue-600" to={"/contacts"}>Contacts</Link> tab</div>}
                         </div>
                         <UploadFile setDocument={setDocument} document={document} />
                         <div className="flex flex-col justify-start items-center">

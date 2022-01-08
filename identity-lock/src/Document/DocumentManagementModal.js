@@ -1,71 +1,71 @@
 import { useEffect, useState } from "react"
 
 import Loader from "react-loader-spinner";
-import { UserRemoveIcon, CloudDownloadIcon, DocumentRemoveIcon } from "@heroicons/react/outline";
+import Select from 'react-select'
+import { Link } from "react-router-dom";
+import { CloudDownloadIcon, DocumentRemoveIcon } from "@heroicons/react/outline";
 import { CustomModal } from "../Components/CustomModal";
 import useNetwork from "../Network/useNetwork";
 
-const SharedWithList = ({ people, owner, removeContact }) => {
-    if (!people) {
-        return (
-            <div className="col-span-3"> You haven't shared this document with anyone yet.</div>
-        )
-    }
-    return (
-        <ul role="list" className="divide-y divide-gray-200 h-72 overflow-y-auto col-span-2">
-            {people.map((person) => (
-                <li key={person.email} className="py-4 flex">
-                    <div className="flex-1 flex">
-                        <div className="ml-3">
-                            <p className="text-sm font-medium text-gray-900">{person.name}</p>
-                            <p className="text-sm text-gray-500">{person.email}</p>
-                        </div>
-
-                    </div>
-                    {owner && <button
-                        type="button"
-                        onClick={() => removeContact(person.id)}
-                        className="bg-white-800 p-1 mr-5 my-auto rounded-full hover:bg-blue-200"
-                    >
-                        <UserRemoveIcon className="h-6 text-red-500 " />
-                    </button>}
-                </li>
-            ))}
-        </ul>
-    )
-}
-
-
 export const DocumentManagementModal = ({ documentID, viewDocument, closeModal }) => {
-    const { apiGet } = useNetwork()
+    const { apiGet, multipartFormPost } = useNetwork()
     const [document, setDocument] = useState(null)
     const [loading, setLoading] = useState(false)
-    const [forceReload, setForceReload] = useState(false)
+    const [contacts, setContacts] = useState([])
+    const [currentViewers, setCurrentViewers] = useState([])
+    const [approvedList, setApprovedList] = useState(null)
+    const [editOccured, setEditOccured] = useState(false)
 
     useEffect(async () => {
         setLoading(true)
-        const resp = await apiGet('/api/getdocumentinfo', { id: documentID })
+        let resp = await apiGet('/api/getdocumentinfo', { id: documentID })
 
         if (resp) {
             setDocument(resp)
         }
 
+        if (resp?.approved) {
+            console.log(resp.approved)
+            const currentViewers = resp.approved.map((u) => ({ label: u.name, value: u.id }))
+            setCurrentViewers(currentViewers)
+        }
+        console.log(currentViewers)
+
+        resp = await apiGet('/api/getcontacts')
+        const options = []
+        if (resp) {
+            for (const contact of resp) {
+                options.push({ label: contact.name, value: contact.id })
+            }
+        }
+        setContacts(options)
+
         setLoading(false)
-    }, [forceReload])
+    }, [])
 
     const deleteDocument = async () => {
         await apiGet('/api/deletedocument', { id: document.id })
         closeModal()
     }
 
-    const removeContact = async (id) => {
-        await apiGet('/api/removeviewer', { contact_id: id, document_id: document.id })
-        setForceReload(!forceReload)
+    const manageUpdatedContacts = async () => {
+        if (editOccured) {
+            console.log(approvedList)
+            const data = new FormData()
+            data.append("docID", documentID)
+            data.append("contacts", approvedList.map((u) => (u.value)))
+            await multipartFormPost('/api/setviewers', data)
+        }
+    }
+
+    const close = async () => {
+        await manageUpdatedContacts()
+        closeModal()
     }
 
     return (
-        <CustomModal open={true} display={closeModal}>
-            {loading || !document ? <div className="flex items-center justify-center m-20" ><Loader type="Circles" color="#1565c0" height={120} width={120} /></div> : 
+        <CustomModal open={true} display={close}>
+            {loading || !document ? <div className="flex items-center justify-center m-20" ><Loader type="Circles" color="#1565c0" height={120} width={120} /></div> :
                 <div className="bg-white shadow overflow-hidden sm:rounded-lg">
                     <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                         <h3 className="text-lg leading-6 font-medium text-gray-900">{document.owner ? "Document Information" : `Shared by ${document.author}`}</h3>
@@ -88,12 +88,17 @@ export const DocumentManagementModal = ({ documentID, viewDocument, closeModal }
                                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{document.uploaded}</dd>
                             </div>
                             <div className="py-4 sm:py-5 sm:grid grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">Shared with {document?.approved?.length ? document.approved.length : 0} </dt>
-                                <SharedWithList people={document.approved} removeContact={removeContact} owner={document.owner} className="col-span-2" />
+                                {document.owner ?
+                                    (contacts.length ? 
+                                    <div clas>
+                                    <Select className="col-span-3" placeholder={"Select Contacts to add to document"} defaultValue={currentViewers} isMulti={true} onChange={(val) => {setApprovedList(val); !editOccured && setEditOccured(true)}} options={contacts} /> 
+                                    (editOccured && <div className="col-span-3 text-center">Changes saved automatically</div>)
+                                    </div> 
+                                    : <div className="text-grey-700 text-center col-span-3">Find contacts to add in the <Link className="text-blue-600" to={"/contacts"}>Contacts</Link> tab</div>) : <div className="col-span-3">{`Only the document owner is allowed to see and modify approved viewers`}</div>}
                             </div>
                             <div className="flex justify-center items-center align-center">
                                 <button
-                                    onClick={() => { viewDocument(document) }}
+                                    onClick={() => { manageUpdatedContacts(); viewDocument(document) }}
                                     type="button"
                                     className="inline-flex place-self-auto px-20 py-3 m-6 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                 >

@@ -88,22 +88,37 @@ func (api *Api) DeleteDocument(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (api *Api) RemoveApprovedViewer(w http.ResponseWriter, r *http.Request) {
+func (api *Api) SetApprovedViewerList(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
-	contactID := r.URL.Query()["contact_id"][0]
-	documentID := r.URL.Query()["document_id"][0]
+	r.ParseMultipartForm(32 << 20) // limit your max input length!
+
+	docID := r.Form.Get("docID")
+	authorizedUsers := r.Form.Get("contacts")
+	contactIDs := strings.Split(authorizedUsers, ",")
+
+	var approved []*models.User
+	db.DB.Find(&approved, contactIDs)
 
 	var doc models.Document
-	db.DB.Where("id = ?", documentID).Find(&doc)
+	db.DB.Where("id = ?", docID).Find(&doc)
 
 	if doc.DocumentOwner != user.ID {
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 
-	db.DB.Model(&doc).Association("approved_documents").Delete(contactID)
+	// Again - ugly hack, but unclear WHY the stated documentation on association
+	// for gorm doesn't work... and unfortunatley running out of time to get the site working.
+	// If long term project, would've been worth fixing
+	db.DB.Exec("DELETE FROM approved_documents WHERE document_id = ?", doc.ID)
 
-	db.DB.Where("user_id = ? AND document_id", contactID, documentID).Association("approved_documents").Delete()
+	doc.ApprovedViewers = approved
+	db.DB.Model(&doc).Updates(doc)
+
+	// err := db.DB.Model(&doc).Association("approved_documents").Replace(approved)
+	// if err != nil {
+	// 	log.Println(err)
+	// }
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -157,7 +172,7 @@ func processDocument(d *models.Document, uID uint) documentListDocument {
 
 	cur.ApprovedViewers = processApprovedUsersForList(curDoc.ApprovedViewers, d.DocumentOwner)
 
-	cur.Owner = curDoc.DocumentOwner == uID
+	cur.Owner = (author.ID == uID)
 
 	return cur
 }
