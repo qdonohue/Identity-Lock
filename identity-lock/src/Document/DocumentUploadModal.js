@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react"
-import AsyncSelect from 'react-select/async';
 import Select from 'react-select'
 
 import { DocumentAddIcon, CheckCircleIcon, EmojiSadIcon } from "@heroicons/react/outline"
 import Loader from "react-loader-spinner";
-import { ContactSelect } from "../Components/ContactSelect"
 import { CustomModal } from "../Components/CustomModal"
 import { UploadFile } from "../Components/UploadFile"
 import useNetwork from "../Network/useNetwork";
@@ -105,7 +103,7 @@ export const DocumentUploadModal = ({ closeModal }) => {
                         <div className="py-4 sm:py-5 sm:grid sm:gap-4 sm:px-6">
                             <div className="flex flex-col col-span-3">
                                 <div className="col-span-3 text-sm font-medium text-gray-500 text-center mb-2">Approved Viewers (optional)</div>
-                                {contacts.length ? <Select placeholder={"Select approved viewers"} isMulti={true} onChange={(val) => setSharedList(val)} options={contacts} /> : <div className="text-grey-700 text-center">Find contacts to add in the <Link className="text-blue-600" to={"/contacts"}>Contacts</Link> tab</div>}
+                                {contacts.length ? <Select maxMenuHeight={100} placeholder={"Select approved viewers"} isMulti={true} onChange={(val) => setSharedList(val)} options={contacts} /> : <div className="text-grey-700 text-center">Find contacts to add in the <Link className="text-blue-600" to={"/contacts"}>Contacts</Link> tab</div>}
                             </div>
                         </div>
                         <UploadFile setDocument={setDocument} document={document} />

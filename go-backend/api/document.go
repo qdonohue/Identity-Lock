@@ -88,6 +88,14 @@ func (api *Api) DeleteDocument(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func setViewerListInDB(doc models.Document, viewers []*models.User) {
+	db.DB.Exec("DELETE FROM approved_documents WHERE document_id = ?", doc.ID)
+
+	doc.ApprovedViewers = viewers
+	db.DB.Model(&doc).Updates(doc)
+
+}
+
 func (api *Api) SetApprovedViewerList(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
 
@@ -107,18 +115,7 @@ func (api *Api) SetApprovedViewerList(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 
-	// Again - ugly hack, but unclear WHY the stated documentation on association
-	// for gorm doesn't work... and unfortunatley running out of time to get the site working.
-	// If long term project, would've been worth fixing
-	db.DB.Exec("DELETE FROM approved_documents WHERE document_id = ?", doc.ID)
-
-	doc.ApprovedViewers = approved
-	db.DB.Model(&doc).Updates(doc)
-
-	// err := db.DB.Model(&doc).Association("approved_documents").Replace(approved)
-	// if err != nil {
-	// 	log.Println(err)
-	// }
+	setViewerListInDB(doc, approved)
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -231,6 +228,9 @@ func (api *Api) GetDocumentInformation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("Approved list for doc: ")
+	log.Println(doc.ApprovedViewers)
+
 	body, err := json.Marshal(processDocument(doc, user.ID))
 	if err != nil {
 		log.Println("Error getting documents data")
@@ -248,13 +248,17 @@ func (api *Api) GetDocumentFile(w http.ResponseWriter, r *http.Request) {
 	docID := r.URL.Query()["id"][0]
 
 	var doc models.Document
-	db.DB.Find(&doc, docID)
+	db.DB.Preload("ApprovedViewers").Find(&doc, docID)
 
 	found := doc.DocumentOwner == user.ID
 
 	if !found {
-		count := db.DB.Model(&user).Where("document_id = ?", doc).Association("approved_documents").Count()
-		found = (count == 1)
+		for _, u := range doc.ApprovedViewers {
+			if u.ID == user.ID {
+				found = true
+				break
+			}
+		}
 	}
 
 	if !found {
@@ -264,4 +268,35 @@ func (api *Api) GetDocumentFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.ServeFile(w, r, doc.LocalTitle)
+}
+
+func (api *Api) RemoveViewerFromAlert(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(app_constants.ContextUserKey).(models.User)
+
+	alertID := r.URL.Query()["alertID"][0]
+
+	var alert models.Alerts
+	db.DB.Find(&alert, alertID)
+
+	if alert.DocumentOwner != user.ID {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("You don't have permission to modify that document"))
+		return
+	}
+
+	var doc models.Document
+	db.DB.Preload("ApprovedViewers").Find(&doc, alert.Document)
+
+	var updatedList []*models.User
+
+	for _, v := range doc.ApprovedViewers {
+		if v.ID == alert.Violator {
+			continue
+		}
+		updatedList = append(updatedList, v)
+	}
+
+	setViewerListInDB(doc, updatedList)
+
+	w.WriteHeader(http.StatusOK)
 }

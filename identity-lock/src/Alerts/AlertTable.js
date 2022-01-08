@@ -1,22 +1,5 @@
 
-const distributedBadge = (sent, owner) => {
-
-    if (!owner) {
-        return (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                Recieved
-            </span>
-        )
-    }
-
-    return (sent ? <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-        Sent
-    </span> : <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-        Unshared
-    </span>)
-}
-
-export const DocumentTable = ({ documents, documentManagementModal }) => {
+export const AlertTable = ({alerts, alertManagementModal}) => {
 
     return (
         <div className="flex-1 flex flex-col px-5 mx-10 w-full">
@@ -36,28 +19,29 @@ export const DocumentTable = ({ documents, documentManagementModal }) => {
                                         scope="col"
                                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                     >
-                                        Status
+                                        Violator's name
                                     </th>
                                     <th
                                         scope="col"
                                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                     >
-                                        Uploaded By
-                                    </th><th
+                                        Most Recent Violation
+                                    </th>
+                                    <th
                                         scope="col"
                                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                     >
-                                        Uploaded Date
+                                        Violation Count
                                     </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
-                                {documents.map((document, documentIdx) => (
-                                    <tr key={documentIdx} className="bg-white hover:bg-gray-100 cursor-pointer" onClick={() => { documentManagementModal(document.id) }}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{document.name}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{distributedBadge(document.approved, document.owner)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{document.author}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{document.uploaded}</td>
+                                {alerts.map((alert, alertIdx) => (
+                                    <tr key={alertIdx} className="bg-white hover:bg-gray-100 cursor-pointer" onClick={() => {alertManagementModal(alert.id)}}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{alert.documentname}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{alert.violatorname}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{alert.date}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{alert.count}</td>
                                     </tr>
                                 ))}
                             </tbody>
