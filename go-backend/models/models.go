@@ -13,7 +13,7 @@ type User struct {
 	Documents         []*Document `gorm:"foreignKey:DocumentOwner;constraint:OnDelete:SET NULL;"`
 	ApprovedDocuments []*Document `gorm:"many2many:approved_documents;"`
 	Contacts          []*User     `gorm:"many2many:contacts;"`
-	Alerts            []Alerts    `gorm:"foreignKey:DocumentOwner"`
+	Alerts            []*Alerts   `gorm:"foreignKey:DocumentOwner"`
 	FaceKey           uuid.UUID
 }
 
@@ -27,9 +27,10 @@ type Document struct {
 
 type Alerts struct {
 	gorm.Model
-	Document      Document `gorm:"foreignKey:ID"`
+	Document      uint
 	DocumentOwner uint
-	Violator      User
+	Violator      uint
+	Count         int
 }
 
 func MakeMigrations(db *gorm.DB) error {

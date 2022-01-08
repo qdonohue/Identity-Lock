@@ -67,6 +67,12 @@ export const DocumentView = () => {
         [webcamRef]
     );
 
+    useEffect(async () => {
+        if (!accessGranted) {
+            await multipartFormPost('/api/createalert', {documentID: id})
+        }
+    }, [accessGranted])
+
     useEffect(() => {
         const interval = setInterval(() => {
             capture()
@@ -79,12 +85,17 @@ export const DocumentView = () => {
         setPdf(reply)
     }, [document])
 
+    const forceAlert = async () => {
+        await multipartFormPost('/api/createalert', {documentID: id})
+    }
+
     function onDocumentLoadSuccess({ numPages }) {
         setNumPages(numPages);
     }
 
     return (
         <div className="flex flex-col justify-center">
+        <div onClick={forceAlert}>Looks ugly click here to force alert</div>
 
             {accessGranted ?
                 <div className="flex justify-center">

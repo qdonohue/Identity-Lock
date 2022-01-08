@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react"
 
 import useNetwork from "../Network/useNetwork"
-import { DocumentTableHeader } from "./DocumentTableHeader"
-import { DocumentManagementModal } from "./DocumentManagementModal"
-import { DocumentUploadModal } from "./DocumentUploadModal"
 import { useHistory } from "react-router-dom"
 import { AlertTableHeader } from "./AlertTableHeader"
 import { AlertTable } from "./AlertTable"
-import { AlertManagementModal } from "./AlertManagementModal"
+// import { AlertManagementModal } from "./AlertManagementModal"
 
 export const Alerts = () => {
     const { apiGet } = useNetwork();
@@ -31,10 +28,9 @@ export const Alerts = () => {
 
     return (
         <div className="flex flex-col align-center items-center justify-start max-h-screen">
-            {(alertManagementModal || alertManagementModal == 0) && <AlertManagementModal />}
+            {/* {(alertManagementModal || alertManagementModal == 0) && <AlertManagementModal />} */}
             <AlertTableHeader count={alerts.length} />
-            <AlertTable alerts={alerts} />
-            <DocumentTable documents={documents} documentManagementModal={openManagementModal} />
+            <AlertTable alerts={alerts} alertManagementModal={openManagementModal}/>
         </div>
     )
 }

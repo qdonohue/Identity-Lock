@@ -30,7 +30,7 @@ export const AlertTable = ({alerts, alertManagementModal}) => {
                                         scope="col"
                                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                     >
-                                        Violation Date
+                                        Most Recent Violation
                                     </th>
                                     <th
                                         scope="col"
@@ -41,7 +41,7 @@ export const AlertTable = ({alerts, alertManagementModal}) => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
-                                {documents.map((alert, alertIdx) => (
+                                {alerts.map((alert, alertIdx) => (
                                     <tr key={alertIdx} className="bg-white hover:bg-gray-100 cursor-pointer" onClick={() => {alertManagementModal(alert.id)}}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{alert.documentname}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{alert.violatorname}</td>
