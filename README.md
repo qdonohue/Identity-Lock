@@ -35,9 +35,10 @@ Cd into the `identity-lock` folder.
 
 To install all dependencies, run `yarn install`
 
-### Running the backend
+### Running the frontend
 Launch the backend with `yarn start`. 
 
 `localhost:3000` should be automatically launched on your preferred browser, but you can also navigate to it to view the site.
 
+The site has been seeded with some dummy users - try searching for Sarah, Julian, Thomas, Nancy, or Bob.
 
