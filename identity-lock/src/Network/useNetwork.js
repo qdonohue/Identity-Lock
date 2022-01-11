@@ -36,7 +36,8 @@ export const NetworkProvider = ({ children }) => {
         const token = await getToken()
 
         try {
-            const response = await axios.post(process.env.REACT_APP_BACKEND_URL + endpoint, payload, {
+            const response = await axios.post( 'http://localhost:8080'
+ + endpoint, payload, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -65,7 +66,8 @@ export const NetworkProvider = ({ children }) => {
         const token = await getToken()
 
         try {
-            const response = await axios.post(process.env.REACT_APP_BACKEND_URL + endpoint,
+            const response = await axios.post( 'http://localhost:8080'
+ + endpoint,
                 payload, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -89,7 +91,8 @@ export const NetworkProvider = ({ children }) => {
 
         const token = await getToken()
         try {
-            const response = await axios.get(process.env.REACT_APP_BACKEND_URL + endpoint, {
+            const response = await axios.get( 'http://localhost:8080'
+ + endpoint, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -113,7 +116,8 @@ export const NetworkProvider = ({ children }) => {
         const token = await getToken()
 
         try {
-            const response = await axios.get(process.env.REACT_APP_BACKEND_URL + endpoint, {
+            const response = await axios.get( 'http://localhost:8080'
+ + endpoint, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -153,7 +157,6 @@ export const NetworkProvider = ({ children }) => {
     const memoedValue = useMemo(
         () => ({
             loading,
-            error,
             apiPost,
             multipartFormPost,
             apiGet,
@@ -162,7 +165,7 @@ export const NetworkProvider = ({ children }) => {
             registered,
             setRegistered,
         }),
-        [loading, error, registered]
+        [loading, registered]
     );
 
     // We only want to render the underlying app after we

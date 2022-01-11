@@ -1,55 +1,43 @@
 # Identity-Lock
 
+## Getting Started with Identity Lock
 
-# TODO:
-
-## Document management:
-- Loading state for PDF
-- Delete document
-- Rename document (?)
-
-## Contacts / sharing
-- Add a contact / search for one
-- Share document with a person
-- See document appear as the non-owner of the document
-- Validate permissions for viewing document
-## TODO:
-- How to manage contacts being visible to others? Being open to everyone on site prob a no go (especially not contact photo... but maybe for someone who is added? That requires an element of opt-in on contact add invite)
-- Search options --> search by email or name
-- Standarize badge into modal too?
-
-- Get authorized users for document --> verify that model is storing this array correctly!
-
-## Contact Selection
-- Feed contacts into search-async component
-- Add to document based on selection (How do those results get passed?)
-    - Possible you can grab onchange - but would need to store record of diff and not just auto-send
-    - Or could have an explicit "add" button --> need to trigger re-render btw...
-
-## Alerts / Violations
-- More nuanced violations (create violation IFF unverified-person violation)
-- Violation / alerts page (dismiss?)
+To begin with, clone the repo -
+### Https:
+```git clone https://github.com/qdonohue/Identity-Lock.git```
+### SSH
+```git clone git@github.com:qdonohue/Identity-Lock.git```
 
 
-## Paper
-- Probably get done BEFORE deployment
-- uhhh whatever goes into this....
+## Setting up the backend
+If Go isn't installed get go via `brew install golang`.
 
-## Deployment
 
-### Hosting Frontend
-- S3 bucket equivalent for react
-- HTTPS (?)
-- URL / DNS bullshit
+Cd into the `go-backend` directory, and run `go mod download` to install all dependencies.
 
-### Hosting backend
-- RDS for backend
-- Go server
-- HTTPS (?)
-- Blob storage
-- Face API integration inside microsoft network ?
+Next, copy the FACE_SUBSCRIPTION_KEY from the Final IW Appendix into the `environment` file value for it.
 
-### Auth0 Cleanup
-- Better image
-- Verify it works
+### Running the backend
+At this point you're ready to launch the backend. Launch it the first time by running:
+
+```go run .```
+
+Since this is optimized for local development, if you want to re-create the server run it with:
+
+```rm gorm.db && go run .```
+
+(this deletes the local database file)
+
+## Setting up the frontend
+This requires Yarn - it can be installed with  `brew install yarn`.
+
+Cd into the `identity-lock` folder.
+
+To install all dependencies, run `yarn install`
+
+### Running the backend
+Launch the backend with `yarn start`. 
+
+`localhost:3000` should be automatically launched on your preferred browser, but you can also navigate to it to view the site.
+
 

@@ -16,10 +16,10 @@ import (
 
 func main() {
 	// Load env variables
-	err := godotenv.Load()
+	err := godotenv.Load("environment")
 
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Fatalf("Error loading environment file")
 	}
 
 	err = db.Open()

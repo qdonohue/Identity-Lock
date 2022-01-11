@@ -1,0 +1,3 @@
+FACE_SUBSCRIPTION_KEY=COPY_FACE_KEY_HERE
+FACE_ENDPOINT=https://identity-lock.cognitiveservices.azure.com/
+PERSON_GROUP_LABEL=identitylockmisc0123
