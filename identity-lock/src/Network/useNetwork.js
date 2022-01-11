@@ -18,7 +18,6 @@ export const NetworkProvider = ({ children }) => {
     const history = useHistory();
     const [loading, setLoading] = useState(false);
     const [registered, setRegistered] = useState(false);
-    const [error, setError] = useState(null);
 
     function registrationNeeded(response) {
         if (response.data["UserNotFound"] == true) {

@@ -2,7 +2,6 @@ package app
 
 import (
 	"Identity-Lock/go-backend/api"
-	"Identity-Lock/go-backend/app_constants"
 	"Identity-Lock/go-backend/middleware"
 	"Identity-Lock/go-backend/ml"
 	"log"
@@ -17,18 +16,12 @@ type App struct {
 	ml     *ml.Ml
 }
 
-func pong(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Context().Value(app_constants.ContextUserKey).(string))
-	w.Write([]byte("pong"))
-}
-
 func NewApp(ml *ml.Ml, tempDir string) *App {
 
 	api := api.NewApi(ml, tempDir)
 
 	r := mux.NewRouter()
 	api.RegisterRoutes(r)
-	r.HandleFunc("/ping", pong)
 
 	r.Use(middleware.LoggingMiddleware)
 	r.Use(middleware.AuthMiddleware)
